@@ -22,6 +22,7 @@ type Props = {
 export function ResultOverlay({ result, me, players, isHost, onRematch, onLobby }: Props) {
   const play = useSound();
   const [hidden, setHidden] = useState(false);
+  const [ready, setReady] = useState(false);
   const shownFor = useRef<GameResult | null>(null);
   const iWon = Boolean(result?.winners.includes(me));
   const iLost = Boolean(result && (result.loser === me || (result.winners.length > 0 && !iWon)));
@@ -29,14 +30,16 @@ export function ResultOverlay({ result, me, players, isHost, onRematch, onLobby 
   useEffect(() => {
     if (!result || shownFor.current === result) return;
     shownFor.current = result;
+    setHidden(false);
+    setReady(false);
     const t = setTimeout(() => {
-      setHidden(false);
+      setReady(true);
       play(iWon ? "win" : iLost ? "lose" : "turn", iWon ? [60, 40, 120] : 80);
-    }, 700);
+    }, 450);
     return () => clearTimeout(t);
   }, [result, iWon, iLost, play]);
 
-  const open = Boolean(result) && !hidden;
+  const open = Boolean(result) && !hidden && ready;
 
   return (
     <AnimatePresence>
@@ -47,15 +50,15 @@ export function ResultOverlay({ result, me, players, isHost, onRematch, onLobby 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ delay: 0.7 }}
+          transition={{ duration: 0.18 }}
         >
-          {iWon && <Confetti />}
+          {result.winners.length > 0 && <Confetti />}
           <motion.div
             initial={{ scale: 0.6, y: 40, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 22, delay: 0.8 }}
-            className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-popover p-6 text-center shadow-2xl"
+            transition={{ type: "spring", stiffness: 320, damping: 20, delay: 0.05 }}
+            className="relative z-10 w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-popover p-6 text-center shadow-2xl"
             role="dialog"
             aria-label="Game result"
           >
@@ -71,7 +74,7 @@ export function ResultOverlay({ result, me, players, isHost, onRematch, onLobby 
               className="mx-auto text-6xl"
               initial={{ rotate: -20, scale: 0 }}
               animate={{ rotate: 0, scale: 1 }}
-              transition={{ type: "spring", stiffness: 400, damping: 12, delay: 1 }}
+              transition={{ type: "spring", stiffness: 400, damping: 12, delay: 0.12 }}
             >
               {iWon ? "🏆" : result.winners.length === 0 && !result.loser ? "🤝" : iLost ? "😅" : "🎉"}
             </motion.div>
@@ -89,7 +92,7 @@ export function ResultOverlay({ result, me, players, isHost, onRematch, onLobby 
                       key={s.playerId + i}
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 1.1 + i * 0.08 }}
+                      transition={{ delay: 0.18 + i * 0.06 }}
                       className={`flex items-center gap-3 rounded-xl border p-2 ${won ? "border-primary/40 bg-primary/10" : "border-border"}`}
                     >
                       <PlayerAvatar avatar={p.avatar} seat={p.seat} size="sm" />

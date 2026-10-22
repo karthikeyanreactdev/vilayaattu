@@ -19,7 +19,7 @@ export const TOUR_STEPS: Record<"home" | "lobby", DriveStep[]> = {
     },
     {
       element: '[data-tour="catalog"]',
-      popover: { title: "8 games, one app", description: "Tamil classics, cricket, chess and card games." },
+      popover: { title: "9 games, one app", description: "Tamil classics, cricket, chess and card games." },
     },
     {
       element: '[data-tour="game-actions"]',
@@ -40,7 +40,7 @@ export const TOUR_STEPS: Record<"home" | "lobby", DriveStep[]> = {
   lobby: [
     {
       element: '[data-tour="room-code"]',
-      popover: { title: "Your room code", description: "Share this code, or tap Invite friends to send a link." },
+      popover: { title: "Your room code", description: "Copy the link, send it on WhatsApp, or tap Share to invite friends." },
     },
     {
       element: '[data-tour="players"]',

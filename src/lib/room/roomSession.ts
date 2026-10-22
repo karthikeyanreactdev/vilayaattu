@@ -196,8 +196,10 @@ export class RoomSession {
       const wait = this.botWait.get(seat.id);
       if (!wait || wait.moveNo !== game.moveNo) {
         // On the first move, let the shuffle/deal animation finish first.
-        const intro = game.moveNo === 0 ? 2600 : 0;
-        this.botWait.set(seat.id, { moveNo: game.moveNo, at: now + intro + thinkTime(level) });
+        // Live games (a ball in the air) time the move themselves, so ask at once.
+        const intro = !def.live && game.moveNo === 0 ? 2600 : 0;
+        const think = def.live ? 40 : thinkTime(level);
+        this.botWait.set(seat.id, { moveNo: game.moveNo, at: now + intro + think });
         continue;
       }
       if (now < wait.at) continue;
@@ -487,6 +489,10 @@ export class RoomSession {
     } else {
       this.transport?.send<Hello>(CHANNELS.HELLO, profile);
     }
+  }
+
+  get active() {
+    return !this.disposed;
   }
 
   dispose() {

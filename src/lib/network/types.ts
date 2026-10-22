@@ -45,6 +45,10 @@ export class Emitter {
     this.map.get(key)?.forEach((fn) => (fn as (...a: unknown[]) => void)(...args));
   }
 
+  has(key: string) {
+    return (this.map.get(key)?.size ?? 0) > 0;
+  }
+
   clear() {
     this.map.clear();
   }

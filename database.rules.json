@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "rooms": {
+      "$room": {
+        "peers": {
+          ".read": "auth != null",
+          "$peer": {
+            ".write": "auth != null && auth.uid == $peer && (!newData.exists() || newData.child('at').isNumber())"
+          }
+        },
+        "inbox": {
+          "$peer": {
+            ".read": "auth != null && auth.uid == $peer",
+            "$msg": {
+              ".write": "auth != null && (!newData.exists() ? auth.uid == $peer : newData.child('from').isString() && newData.child('channel').isString())"
+            }
+          }
+        }
+      }
+    }
+  }
+}

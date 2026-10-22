@@ -20,6 +20,7 @@ type AnyBoard = ComponentType<GameBoardProps<any, any>>;
 export const BOARDS: Record<string, AnyBoard> = {
   "hand-cricket": dynamic(() => import("./hand-cricket/Board"), { loading: Loading }),
   "book-cricket": dynamic(() => import("./book-cricket/Board"), { loading: Loading }),
+  ludo: dynamic(() => import("./ludo/Board"), { loading: Loading }),
   pallanguzhi: dynamic(() => import("./pallanguzhi/Board"), { loading: Loading }),
   "aadu-puli": dynamic(() => import("./aadu-puli/Board"), { loading: Loading }),
   chess: dynamic(() => import("./chess/Board"), { loading: Loading }),

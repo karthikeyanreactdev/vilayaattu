@@ -29,7 +29,7 @@ export type TransportKind = "p2p" | "local" | "socket";
 
 export const NETWORK = {
   /**
-   * p2p    – WebRTC through public Nostr relays (works across devices, no backend)
+   * p2p    – Firebase Realtime Database (works across phones and networks)
    * local  – BroadcastChannel (same browser, different tabs; handy for development)
    * socket – reserved for the future backend
    */
@@ -109,5 +109,5 @@ export const ANIMATION = {
 
 export const ROUTES = {
   HOME: "/",
-  ROOM: (code: string) => `/room/${code}`,
+  ROOM: (code: string) => `/room?code=${code}`,
 } as const;

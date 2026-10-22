@@ -1,6 +1,7 @@
 import type { AnyGameDefinition, BaseGameState, GameBot, GameCategory, GameDefinition, GameRules } from "./types";
 import { handCricket } from "./hand-cricket/logic";
 import { bookCricket } from "./book-cricket/logic";
+import { ludo } from "./ludo/logic";
 import { pallanguzhi } from "./pallanguzhi/logic";
 import { aaduPuli } from "./aadu-puli/logic";
 import { chessGame } from "./chess/logic";
@@ -9,6 +10,7 @@ import { onnu } from "./onnu/logic";
 import { rummy } from "./rummy/logic";
 import { handCricketBot } from "./hand-cricket/bot";
 import { bookCricketBot } from "./book-cricket/bot";
+import { ludoBot } from "./ludo/bot";
 import { pallanguzhiBot } from "./pallanguzhi/bot";
 import { aaduPuliBot } from "./aadu-puli/bot";
 import { chessBot } from "./chess/bot";
@@ -25,6 +27,7 @@ const withBot = <S extends BaseGameState, A>(rules: GameRules<S, A>, bot: GameBo
 export const GAMES: AnyGameDefinition[] = [
   withBot(handCricket, handCricketBot),
   withBot(bookCricket, bookCricketBot),
+  withBot(ludo, ludoBot),
   withBot(pallanguzhi, pallanguzhiBot),
   withBot(aaduPuli, aaduPuliBot),
   withBot(chessGame, chessBot),

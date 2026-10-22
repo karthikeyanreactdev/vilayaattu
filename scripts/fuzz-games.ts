@@ -15,6 +15,8 @@ function candidates(id: string, s: any, by: string): any[] {
       return [{ type: "call", call: pick(["odd", "even"]) }, { type: "toss-pick", n: 1 + Math.floor(Math.random() * 6) }, { type: "choose", choice: pick(["bat", "bowl"]) }, { type: "pick", n: 1 + Math.floor(Math.random() * 6) }];
     case "book-cricket":
       return [{ type: "flip" }];
+    case "ludo":
+      return [{ type: "roll" }, ...[0, 1, 2, 3].map((token) => ({ type: "move", token }))];
     case "pallanguzhi":
       return Array.from({ length: 14 }, (_, pit) => ({ type: "sow", pit }));
     case "aadu-puli": {

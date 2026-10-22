@@ -22,6 +22,8 @@ export class BotRunner {
       this.worker.onerror = () => {
         this.worker?.terminate();
         this.worker = null;
+        for (const resolve of this.pending.values()) resolve([]);
+        this.pending.clear();
       };
     } catch {
       this.worker = null;

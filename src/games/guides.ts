@@ -27,6 +27,23 @@ export const GUIDES: Record<string, GameGuide> = {
       { term: "Target", meaning: "First innings score + 1. The chaser must reach it." },
     ],
   },
+  ludo: {
+    goal: "Get all four tokens to the centre before the other colours.",
+    controls: [
+      "Tap Roll on your turn. A 6 brings a token out of the yard.",
+      "When tokens glow, tap the one you want to move.",
+    ],
+    tips: [
+      "A 6, or sending someone home, gives you another roll.",
+      "Starred squares and start squares are safe.",
+      "You need the exact number to enter the centre. Extra pips do not count.",
+      "Three 6s in a row cancels that turn.",
+    ],
+    terms: [
+      { term: "Yard", meaning: "The corner where your tokens start. Only a 6 lets one out." },
+      { term: "Safe", meaning: "A start square or a star. Tokens there cannot be sent home." },
+    ],
+  },
   "book-cricket": {
     goal: "Flip the book for runs. Highest total after both innings wins.",
     controls: ["When you're batting, tap Flip the book. Bowlers just watch and cheer."],

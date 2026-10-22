@@ -40,10 +40,13 @@ export function useRoomSession(code: string): RoomSession | null {
       toast.error(msg, { id: "game-error" });
     });
     s.connect()
-      .then(() => setSession(s))
+      .then(() => {
+        if (s.active) setSession(s);
+      })
       .catch((err: unknown) => {
-      dispatch(statusChanged({ status: "closed", message: err instanceof Error ? err.message : "Connection failed" }));
-    });
+        if (!s.active) return;
+        dispatch(statusChanged({ status: "closed", message: err instanceof Error ? err.message : "Connection failed" }));
+      });
     return () => {
       s.dispose();
       dispatch(roomClosed());

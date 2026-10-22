@@ -88,7 +88,7 @@ export function GameStage({ session, onLeave }: Props) {
       </div>
 
       <main className="relative mx-auto flex w-full max-w-6xl min-h-0 flex-1 flex-col">
-        {Board && state ? (
+        {room.phase === "playing" && room.gamePlayers.length > 0 && Board && state ? (
           <Board
             state={state}
             me={me}

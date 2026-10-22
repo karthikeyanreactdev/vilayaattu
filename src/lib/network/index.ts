@@ -25,6 +25,6 @@ export async function createTransport(roomCode: string, kind?: TransportKind): P
   if (chosen === "socket") {
     throw new Error("Socket transport needs a backend. Set NEXT_PUBLIC_TRANSPORT=p2p for now.");
   }
-  const { P2PTransport } = await import("./p2pTransport");
-  return new P2PTransport(roomCode);
+  const { CloudTransport } = await import("./cloudTransport");
+  return CloudTransport.open(roomCode);
 }

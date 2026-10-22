@@ -14,6 +14,7 @@ export function RoomCodeCard({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
   const play = useSound();
   const url = typeof window !== "undefined" ? `${window.location.origin}${ROUTES.ROOM(code)}` : "";
+  const inviteMessage = `Join my ${APP.NAME} room!\nCode: ${formatRoomCode(code)}${url ? `\n${url}` : ""}`;
 
   const copy = async () => {
     try {
@@ -27,6 +28,27 @@ export function RoomCodeCard({ code }: { code: string }) {
     }
   };
 
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteMessage);
+      play("select");
+      toast.success("Invite link copied");
+    } catch {
+      toast.error("Couldn't copy the invite link.");
+    }
+  };
+
+  const shareWhatsApp = () => {
+    play("select");
+    const opened = window.open(`https://wa.me/?text=${encodeURIComponent(inviteMessage)}`, "_blank", "noopener,noreferrer");
+    if (!opened) {
+      void navigator.clipboard.writeText(inviteMessage).then(
+        () => toast.success("Invite copied. Paste it into WhatsApp."),
+        () => toast.error("Couldn't open WhatsApp."),
+      );
+    }
+  };
+
   const share = async () => {
     const text = `Join my ${APP.NAME} room! Code: ${formatRoomCode(code)}`;
     if (navigator.share) {
@@ -36,8 +58,7 @@ export function RoomCodeCard({ code }: { code: string }) {
         /* cancelled */
       }
     } else {
-      await navigator.clipboard.writeText(`${text}\n${url}`).catch(() => undefined);
-      toast.success("Invite link copied");
+      await copyLink();
     }
   };
 
@@ -74,9 +95,15 @@ export function RoomCodeCard({ code }: { code: string }) {
           </AnimatePresence>
         </span>
       </button>
-      <div className="relative mt-3 flex gap-2">
-        <Button onClick={share} className="flex-1" data-tour="share">
-          <Share2 /> Invite friends
+      <div className="relative mt-3 flex flex-wrap gap-2" data-tour="share">
+        <Button variant="outline" className="h-10 min-w-[30%] flex-1" onClick={copyLink}>
+          <Copy /> Copy link
+        </Button>
+        <Button className="h-10 min-w-[30%] flex-1 bg-[#25D366] text-white hover:bg-[#1ebe5d]" onClick={shareWhatsApp}>
+          WhatsApp
+        </Button>
+        <Button variant="secondary" className="h-10 min-w-[30%] flex-1" onClick={share}>
+          <Share2 /> Share
         </Button>
       </div>
     </div>

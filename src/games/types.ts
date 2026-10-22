@@ -108,6 +108,11 @@ export type GameDefinition<S extends BaseGameState = BaseGameState, A = unknown>
   view: (state: S, viewer: PlayerId) => S;
   /** Optional host-side timer (chess clocks, auto-advance). Return null for "no change". */
   tick?: (state: S, ctx: ReduceContext) => S | null;
+  /**
+   * The computer must be asked at once. The game itself decides when the
+   * move lands.
+   */
+  live?: boolean;
   bot: GameBot<S, A>;
 };
 
