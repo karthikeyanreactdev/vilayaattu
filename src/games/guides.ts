@@ -157,3 +157,16 @@ export const GUIDES: Record<string, GameGuide> = {
     ],
   },
 };
+
+// Same game on the 3D forest board.
+GUIDES["aadu-puli-3d"] = GUIDES["aadu-puli"];
+GUIDES["chess-3d"] = {
+  ...GUIDES.chess,
+  terms: [
+    ...(GUIDES.chess.terms ?? []),
+    { term: "Raja / Rani", meaning: "King and queen." },
+    { term: "Mantri", meaning: "The bow man: moves like a bishop." },
+    { term: "Kudirai / Yanai", meaning: "Horse (knight) and elephant (rook)." },
+    { term: "Padai Veeran", meaning: "Foot soldier: the pawn." },
+  ],
+};
