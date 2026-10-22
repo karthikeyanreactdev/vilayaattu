@@ -16,6 +16,7 @@ import type { BaseGameState } from "@/games/types";
 import type { RoomSession } from "@/lib/room/roomSession";
 import { useAppSelector } from "@/store";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { VoiceControls } from "@/components/room/VoiceControls";
 import { HowToPlay } from "./HowToPlay";
 import { FloatingReactions, ReactionPicker } from "./Reactions";
 import { ResultOverlay } from "./ResultOverlay";
@@ -53,6 +54,7 @@ export function GameStage({ session, onLeave }: Props) {
             </h1>
             {def?.meta.tamilName && <p className="tamil -mt-0.5 truncate text-xs text-muted-foreground">{def.meta.tamilName}</p>}
           </div>
+          <VoiceControls session={session} compact />
           {def && <HowToPlay meta={def.meta} label="Guide" />}
           {room.isHost && (
             <DropdownMenu>

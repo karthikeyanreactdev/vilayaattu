@@ -29,6 +29,8 @@ export const CHANNELS = {
   KICK: "kick",
   PING: "ping",
   ERROR: "err",
+  /** Microphone audio signalling. The sound itself is a direct call. */
+  VOICE: "voice",
 } as const;
 
 /** Tiny event emitter used by transport implementations. */

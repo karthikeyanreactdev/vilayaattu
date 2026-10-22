@@ -16,6 +16,7 @@ import {
   type Roster,
 } from "@/store/slices/roomSlice";
 import { viewReceived } from "@/store/slices/gameSlice";
+import { VoiceMesh } from "@/lib/voice/voiceMesh";
 import { BotRunner } from "./botRunner";
 import { RoomAdvertiser } from "./matchmaker";
 
@@ -70,6 +71,7 @@ export class RoomSession {
   private botBusy = new Set<string>();
   private botWait = new Map<string, { moveNo: number; at: number }>();
   private advertiser: RoomAdvertiser | null = null;
+  private voiceMesh: VoiceMesh | null = null;
   private readonly createdAt = Date.now();
 
   constructor(
@@ -100,6 +102,10 @@ export class RoomSession {
       return;
     }
     this.transport = transport;
+    if (this.config.mode !== "solo") {
+      this.voiceMesh = new VoiceMesh();
+      this.voiceMesh.attach(transport);
+    }
     const t = transport;
 
     this.unsubs.push(
@@ -491,6 +497,11 @@ export class RoomSession {
     }
   }
 
+  /** Microphone call with the other phones. Absent when playing the computer. */
+  get voice() {
+    return this.voiceMesh;
+  }
+
   get active() {
     return !this.disposed;
   }
@@ -502,6 +513,8 @@ export class RoomSession {
     this.unsubs.forEach((u) => u());
     this.bots?.dispose();
     this.advertiser?.dispose();
+    this.voiceMesh?.stop();
+    this.voiceMesh = null;
     this.transport?.leave();
     this.transport = null;
   }
