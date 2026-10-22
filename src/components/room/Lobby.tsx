@@ -14,7 +14,6 @@ import { useSound } from "@/hooks/useSound";
 import { GameOptionsPanel } from "./GameOptionsPanel";
 import { PlayerList } from "./PlayerList";
 import { RoomCodeCard } from "./RoomCodeCard";
-import { VoiceControls } from "./VoiceControls";
 
 /** Waiting room: invite, pick a game, tweak options, start. */
 export function Lobby({ session }: { session: RoomSession }) {
@@ -52,7 +51,6 @@ export function Lobby({ session }: { session: RoomSession }) {
     <div className="mx-auto grid w-full max-w-6xl gap-4 p-4 pb-32 lg:grid-cols-[340px_1fr]">
       <div className="grid content-start gap-4">
         <RoomCodeCard code={room.code} />
-        <VoiceControls session={session} />
         <PlayerList
           players={room.players}
           hostId={room.hostId}

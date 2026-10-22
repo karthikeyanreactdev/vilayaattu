@@ -14,49 +14,90 @@ const ICE_SERVERS: RTCIceServer[] = [
 export type VoiceMic = "off" | "on" | "busy" | "denied";
 export type VoiceLink = "connecting" | "live" | "failed";
 
+export type RemoteCall = {
+  name: string;
+  avatar: string;
+  camera: boolean;
+  hearing: boolean;
+  stream: MediaStream;
+};
+
 export type VoiceSnapshot = {
   mic: VoiceMic;
   speaker: boolean;
+  camera: VoiceMic;
   peers: Record<string, VoiceLink>;
   /** idle: nobody else yet. connecting / live / failed describe the calls. */
   phase: "idle" | "connecting" | "live" | "failed";
+  remotes: Record<string, RemoteCall>;
+  /** How many other people we are actually receiving audio from. */
+  hearing: number;
+  /** How many other people have their camera on. */
+  seeing: number;
+  localPreview: MediaStream | null;
 };
 
 type Signal =
   | { kind: "sdp"; type: "offer" | "answer"; sdp: string }
-  | { kind: "ice"; candidate: RTCIceCandidateInit };
+  | { kind: "ice"; candidate: RTCIceCandidateInit }
+  | { kind: "hi"; name: string; avatar: string }
+  | { kind: "cam"; on: boolean }
+  | { kind: "need" };
 
 type Link = {
   pc: RTCPeerConnection;
-  polite: boolean;
-  makingOffer: boolean;
-  ignoreOffer: boolean;
+  /** Lower id is the only side that creates offers, so the two browsers cannot talk over each other. */
+  caller: boolean;
   restarted: boolean;
   audio: HTMLAudioElement;
   incoming: MediaStream;
   ice: RTCIceCandidateInit[];
+  audioSender: RTCRtpSender;
+  videoSender: RTCRtpSender;
+  chain: Promise<void>;
 };
 
-const INITIAL: VoiceSnapshot = { mic: "off", speaker: true, peers: {}, phase: "idle" };
+const INITIAL: VoiceSnapshot = {
+  mic: "off",
+  speaker: true,
+  camera: "off",
+  peers: {},
+  phase: "idle",
+  remotes: {},
+  hearing: 0,
+  seeing: 0,
+  localPreview: null,
+};
 
 /**
- * One audio call per other phone. Game moves stay on Firebase; this only
- * carries microphone audio. The peer with the greater id is the polite side
- * and yields if both browsers offer at once.
+ * One call per other phone. Both sides negotiate a mic and a camera slot up
+ * front, then swap in the real devices with replaceTrack. That way a guest
+ * who turns the mic on later is heard, without a second offer the host can drop.
  */
 export class VoiceMesh {
   private transport: Transport | null = null;
   private offs: (() => void)[] = [];
   private links = new Map<PeerId, Link>();
   private peerState: Record<string, VoiceLink> = {};
+  private remotes: Record<string, RemoteCall> = {};
   private localStream: MediaStream | null = null;
   private localTrack: MediaStreamTrack | null = null;
+  private videoStream: MediaStream | null = null;
+  private videoTrack: MediaStreamTrack | null = null;
+  private localPreview: MediaStream | null = null;
   private mic: VoiceMic = "off";
+  private camera: VoiceMic = "off";
   private speaker = true;
   private stopped = false;
   private micLock: Promise<void> | null = null;
+  private camLock: Promise<void> | null = null;
   private snap: VoiceSnapshot = INITIAL;
   private listeners = new Set<() => void>();
+  private name = "Friend";
+  private avatar = "👤";
+  private audioCtx: AudioContext | null = null;
+  private silence: MediaStreamTrack | null = null;
+  private black: MediaStreamTrack | null = null;
 
   snapshot() {
     return this.snap;
@@ -78,13 +119,28 @@ export class VoiceMesh {
     );
   }
 
+  setIdentity(name: string, avatar: string) {
+    this.name = name;
+    this.avatar = avatar;
+    for (const peer of this.links.keys()) this.send(peer, { kind: "hi", name, avatar });
+  }
+
   stop() {
     this.stopped = true;
     this.offs.forEach((off) => off());
     this.offs = [];
     this.localStream?.getTracks().forEach((track) => track.stop());
+    this.videoStream?.getTracks().forEach((track) => track.stop());
+    this.silence?.stop();
+    this.black?.stop();
+    void this.audioCtx?.close().catch(() => undefined);
     this.localStream = null;
     this.localTrack = null;
+    this.videoStream = null;
+    this.videoTrack = null;
+    this.localPreview = null;
+    this.silence = null;
+    this.black = null;
     for (const peer of [...this.links.keys()]) this.drop(peer);
     this.transport = null;
   }
@@ -97,6 +153,20 @@ export class VoiceMesh {
     return this.micLock;
   }
 
+  toggleCamera() {
+    if (this.camLock) return this.camLock;
+    this.camLock = this.flipCamera().finally(() => {
+      this.camLock = null;
+    });
+    return this.camLock;
+  }
+
+  /** Host turned video off. Drop the camera, keep the empty video slot. */
+  stopCamera() {
+    if (this.camera === "off" && !this.videoTrack) return Promise.resolve();
+    return this.releaseCamera();
+  }
+
   toggleSpeaker() {
     this.speaker = !this.speaker;
     for (const link of this.links.values()) {
@@ -106,7 +176,6 @@ export class VoiceMesh {
     this.publish();
   }
 
-  /** Close every call and open them again. */
   retry() {
     const peers = [...this.links.keys()];
     for (const peer of peers) this.drop(peer);
@@ -114,6 +183,7 @@ export class VoiceMesh {
   }
 
   private async flipMic() {
+    void this.audioCtx?.resume().catch(() => undefined);
     if (this.mic === "on" && this.localTrack) {
       this.localTrack.enabled = false;
       this.mic = "off";
@@ -123,6 +193,7 @@ export class VoiceMesh {
     if (this.localTrack) {
       this.localTrack.enabled = true;
       this.mic = "on";
+      await this.applyAudio();
       this.unlock();
       this.publish();
       return;
@@ -141,7 +212,7 @@ export class VoiceMesh {
       this.localStream = stream;
       this.localTrack = stream.getAudioTracks()[0] ?? null;
       if (!this.localTrack) throw new Error("no microphone");
-      for (const link of this.links.values()) await this.attachTrack(link);
+      await this.applyAudio();
       this.mic = "on";
       this.unlock();
     } catch (err) {
@@ -151,12 +222,92 @@ export class VoiceMesh {
     this.publish();
   }
 
-  private async attachTrack(link: Link) {
+  private async flipCamera() {
+    if (this.camera === "on") {
+      await this.releaseCamera();
+      return;
+    }
+    this.camera = "busy";
+    this.publish();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+      });
+      if (this.stopped) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      this.videoStream = stream;
+      this.videoTrack = stream.getVideoTracks()[0] ?? null;
+      if (!this.videoTrack) throw new Error("no camera");
+      this.localPreview = stream;
+      await this.applyVideo(this.videoTrack, false);
+      this.camera = "on";
+      for (const peer of this.links.keys()) this.send(peer, { kind: "cam", on: true });
+    } catch (err) {
+      const blocked = err instanceof DOMException && (err.name === "NotAllowedError" || err.name === "SecurityError");
+      this.camera = blocked ? "denied" : "off";
+      this.localPreview = null;
+    }
+    this.publish();
+  }
+
+  private async releaseCamera() {
+    this.videoStream?.getTracks().forEach((track) => track.stop());
+    this.videoStream = null;
+    this.videoTrack = null;
+    this.localPreview = null;
+    this.camera = "off";
+    await this.applyVideo(this.blackTrack(), true);
+    for (const peer of this.links.keys()) this.send(peer, { kind: "cam", on: false });
+    this.publish();
+  }
+
+  private async applyAudio() {
     if (!this.localTrack) return;
-    let transceiver = link.pc.getTransceivers().find((item) => item.receiver.track?.kind === "audio");
-    if (!transceiver) transceiver = link.pc.addTransceiver(this.localTrack, { direction: "sendrecv" });
-    await transceiver.sender.replaceTrack(this.localTrack);
-    if (transceiver.direction !== "sendrecv") transceiver.direction = "sendrecv";
+    await Promise.all([...this.links.values()].map((link) => link.audioSender.replaceTrack(this.localTrack)));
+  }
+
+  private async applyVideo(track: MediaStreamTrack, quiet: boolean) {
+    await Promise.all(
+      [...this.links.values()].map(async (link) => {
+        await link.videoSender.replaceTrack(track);
+        const params = link.videoSender.getParameters();
+        if (!params.encodings.length) params.encodings = [{}];
+        params.encodings[0].maxBitrate = quiet ? 8_000 : 350_000;
+        await link.videoSender.setParameters(params).catch(() => undefined);
+      }),
+    );
+  }
+
+  private silenceTrack() {
+    if (this.silence) return this.silence;
+    const Ctx = window.AudioContext;
+    this.audioCtx = new Ctx();
+    const dest = this.audioCtx.createMediaStreamDestination();
+    const osc = this.audioCtx.createOscillator();
+    const gain = this.audioCtx.createGain();
+    gain.gain.value = 0;
+    osc.connect(gain);
+    gain.connect(dest);
+    osc.start();
+    this.silence = dest.stream.getAudioTracks()[0];
+    return this.silence;
+  }
+
+  private blackTrack() {
+    if (this.black) return this.black;
+    const canvas = document.createElement("canvas");
+    canvas.width = 16;
+    canvas.height = 16;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, 16, 16);
+    }
+    this.black = canvas.captureStream(1).getVideoTracks()[0];
+    return this.black;
   }
 
   private unlock() {
@@ -172,29 +323,39 @@ export class VoiceMesh {
     audio.setAttribute("playsinline", "true");
     audio.style.display = "none";
     document.body.appendChild(audio);
+    const incoming = new MediaStream();
+    const audioSender = pc.addTrack(this.localTrack ?? this.silenceTrack());
+    const videoSender = pc.addTrack(this.videoTrack ?? this.blackTrack());
     const link: Link = {
       pc,
-      polite: this.transport.selfId > peer,
-      makingOffer: false,
-      ignoreOffer: false,
+      caller: this.transport.selfId < peer,
       restarted: false,
       audio,
-      incoming: new MediaStream(),
+      incoming,
       ice: [],
+      audioSender,
+      videoSender,
+      chain: Promise.resolve(),
     };
     this.links.set(peer, link);
     this.peerState[peer] = "connecting";
+    this.remotes[peer] = { name: "Friend", avatar: "👤", camera: false, hearing: false, stream: incoming };
 
     pc.onicecandidate = (event) => {
       if (event.candidate) this.send(peer, { kind: "ice", candidate: event.candidate.toJSON() });
     };
     pc.ontrack = (event) => {
-      const stream = event.streams[0] ?? link.incoming;
-      if (!event.streams[0]) link.incoming.addTrack(event.track);
-      link.audio.srcObject = stream;
-      link.audio.muted = !this.speaker;
-      void link.audio.play().catch(() => undefined);
-      this.mark(peer, "live");
+      if (!incoming.getTracks().includes(event.track)) incoming.addTrack(event.track);
+      if (event.track.kind === "audio") {
+        audio.srcObject = incoming;
+        audio.muted = !this.speaker;
+        void audio.play().catch(() => undefined);
+        const mark = () => this.setHearing(peer, !event.track.muted && event.track.readyState === "live");
+        event.track.onunmute = mark;
+        event.track.onmute = () => this.setHearing(peer, false);
+        mark();
+      }
+      this.publish();
     };
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === "connected") this.mark(peer, "live");
@@ -206,25 +367,22 @@ export class VoiceMesh {
         pc.restartIce();
       }
     };
-    pc.onnegotiationneeded = async () => {
-      try {
-        link.makingOffer = true;
-        await pc.setLocalDescription();
-        const local = pc.localDescription;
-        if (local && (local.type === "offer" || local.type === "answer")) {
-          this.send(peer, { kind: "sdp", type: local.type, sdp: local.sdp });
-        }
-      } catch {
-        if (!this.stopped) this.mark(peer, "failed");
-      } finally {
-        link.makingOffer = false;
+    pc.onnegotiationneeded = () => {
+      if (!link.caller) {
+        this.send(peer, { kind: "need" });
+        return;
       }
+      void this.offer(link, peer);
     };
 
-    if (this.localTrack && this.localStream) pc.addTrack(this.localTrack, this.localStream);
-    else if (this.localTrack) pc.addTrack(this.localTrack);
-    else pc.addTransceiver("audio", { direction: "recvonly" });
+    this.send(peer, { kind: "hi", name: this.name, avatar: this.avatar });
+    if (this.camera === "on") this.send(peer, { kind: "cam", on: true });
     this.publish();
+  }
+
+  private enqueue(link: Link, task: () => Promise<void>) {
+    link.chain = link.chain.then(task, task).catch(() => undefined);
+    return link.chain;
   }
 
   private drop(peer: PeerId) {
@@ -238,21 +396,56 @@ export class VoiceMesh {
     link.audio.remove();
     this.links.delete(peer);
     delete this.peerState[peer];
+    delete this.remotes[peer];
     this.publish();
   }
 
-  private async onSignal(from: PeerId, msg: Signal) {
+  private offer(link: Link, peer: PeerId) {
+    return this.enqueue(link, async () => {
+      if (this.stopped || !link.caller || link.pc.signalingState !== "stable") return;
+      try {
+        await link.pc.setLocalDescription();
+        const local = link.pc.localDescription;
+        if (local?.type === "offer") this.send(peer, { kind: "sdp", type: "offer", sdp: local.sdp });
+      } catch {
+        if (!this.stopped) this.mark(peer, "failed");
+      }
+    });
+  }
+
+  private onSignal(from: PeerId, msg: Signal) {
     if (this.stopped) return;
+    if (msg.kind === "hi" || msg.kind === "cam") {
+      this.ensure(from);
+      const remote = this.remotes[from];
+      if (!remote) return;
+      if (msg.kind === "hi") {
+        remote.name = msg.name;
+        remote.avatar = msg.avatar;
+      } else {
+        remote.camera = msg.on;
+      }
+      this.publish();
+      return;
+    }
+    if (msg.kind === "need") {
+      this.ensure(from);
+      const link = this.links.get(from);
+      if (link) void this.offer(link, from);
+      return;
+    }
     this.ensure(from);
     const link = this.links.get(from);
     if (!link) return;
+    void this.enqueue(link, () => this.applySignal(link, from, msg));
+  }
+
+  private async applySignal(link: Link, from: PeerId, msg: Signal) {
+    if (this.stopped || msg.kind !== "sdp" && msg.kind !== "ice") return;
     const pc = link.pc;
     try {
       if (msg.kind === "sdp") {
-        const collision = msg.type === "offer" && (link.makingOffer || pc.signalingState !== "stable");
-        link.ignoreOffer = !link.polite && collision;
-        if (link.ignoreOffer) return;
-        if (collision) await pc.setLocalDescription({ type: "rollback" });
+        if (msg.type === "offer" && link.caller) return;
         await pc.setRemoteDescription({ type: msg.type, sdp: msg.sdp });
         if (msg.type === "offer") {
           await pc.setLocalDescription();
@@ -268,12 +461,19 @@ export class VoiceMesh {
         link.ice.push(msg.candidate);
       }
     } catch {
-      if (!this.stopped && !link.ignoreOffer) this.mark(from, "failed");
+      if (!this.stopped) this.mark(from, "failed");
     }
   }
 
   private send(peer: PeerId, msg: Signal) {
     this.transport?.send(CHANNELS.VOICE, msg, peer);
+  }
+
+  private setHearing(peer: PeerId, hearing: boolean) {
+    const remote = this.remotes[peer];
+    if (!remote || remote.hearing === hearing) return;
+    remote.hearing = hearing;
+    this.publish();
   }
 
   private mark(peer: PeerId, state: VoiceLink) {
@@ -284,6 +484,7 @@ export class VoiceMesh {
 
   private publish() {
     const states = Object.values(this.peerState);
+    const remotes = { ...this.remotes };
     const phase = states.some((state) => state === "live")
       ? "live"
       : states.some((state) => state === "connecting")
@@ -291,7 +492,17 @@ export class VoiceMesh {
         : states.some((state) => state === "failed")
           ? "failed"
           : "idle";
-    this.snap = { mic: this.mic, speaker: this.speaker, peers: { ...this.peerState }, phase };
+    this.snap = {
+      mic: this.mic,
+      speaker: this.speaker,
+      camera: this.camera,
+      peers: { ...this.peerState },
+      phase,
+      remotes,
+      hearing: Object.values(remotes).filter((remote) => remote.hearing).length,
+      seeing: Object.values(remotes).filter((remote) => remote.camera).length,
+      localPreview: this.localPreview,
+    };
     this.listeners.forEach((listener) => listener());
   }
 }

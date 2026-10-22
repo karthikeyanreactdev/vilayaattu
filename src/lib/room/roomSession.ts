@@ -90,6 +90,7 @@ export class RoomSession {
       gamePlayers: [],
       isPublic: false,
       capacity: ROOM.MAX_PLAYERS,
+      videoAllowed: false,
     };
     if (isHost) this.config = sessionStore.get<HostSnapshot>(STORAGE_KEYS.HOST_SESSION(code))?.config ?? {};
   }
@@ -105,6 +106,7 @@ export class RoomSession {
     if (this.config.mode !== "solo") {
       this.voiceMesh = new VoiceMesh();
       this.voiceMesh.attach(transport);
+      this.voiceMesh.setIdentity(this.profile.name, this.profile.avatar);
     }
     const t = transport;
 
@@ -135,6 +137,7 @@ export class RoomSession {
         hostId: this.profile.id,
         // In the lobby nobody's seat needs keeping; mid-game, seats wait for reconnects.
         players: saved.roster.phase === "lobby" ? players.filter((p) => p.connected) : players,
+        videoAllowed: saved.roster.videoAllowed ?? false,
       };
       this.game = saved.game;
       this.seq = saved.seq;
@@ -370,6 +373,12 @@ export class RoomSession {
     }, 2500);
   }
 
+  setVideoAllowed(on: boolean) {
+    if (!this.isHost) return;
+    this.roster = { ...this.roster, videoAllowed: on };
+    this.publish();
+  }
+
   setOption(key: string, value: string | number | boolean) {
     if (!this.isHost || this.roster.phase !== "lobby") return;
     this.roster = { ...this.roster, options: { ...this.roster.options, [key]: value } };
@@ -495,6 +504,7 @@ export class RoomSession {
     } else {
       this.transport?.send<Hello>(CHANNELS.HELLO, profile);
     }
+    this.voiceMesh?.setIdentity(profile.name, profile.avatar);
   }
 
   /** Microphone call with the other phones. Absent when playing the computer. */

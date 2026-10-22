@@ -13,6 +13,7 @@ import { formatRoomCode } from "@/lib/random";
 import { forgetRoom, useRoomSession } from "@/hooks/useRoomSession";
 import { useAppSelector } from "@/store";
 import { Lobby } from "./Lobby";
+import { VoiceControls } from "./VoiceControls";
 
 export function RoomScreen({ code }: { code: string }) {
   const router = useRouter();
@@ -99,6 +100,7 @@ export function RoomScreen({ code }: { code: string }) {
           {content}
         </motion.div>
       </AnimatePresence>
+      {session && (room.status === "lobby" || room.status === "playing") && <VoiceControls session={session} />}
       <ProfileDialog open={askName} onOpenChange={() => undefined} required />
       {room.status === "lobby" && <AppTour page="lobby" />}
     </div>

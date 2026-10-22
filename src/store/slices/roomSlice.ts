@@ -25,6 +25,8 @@ export type Roster = {
   isPublic: boolean;
   /** Seats at this table (players + computers). */
   capacity: number;
+  /** Host can let everyone turn on a camera. */
+  videoAllowed: boolean;
 };
 
 export type Reaction = { id: string; playerId: string; emoji: string };
@@ -50,6 +52,7 @@ const initialState: RoomState = {
   gamePlayers: [],
   isPublic: false,
   capacity: 6,
+  videoAllowed: false,
   reactions: [],
 };
 
