@@ -25,6 +25,7 @@ export const BOARDS: Record<string, AnyBoard> = {
   "aadu-puli": dynamic(() => import("./aadu-puli/Board"), { loading: Loading }),
   "aadu-puli-3d": dynamic(() => import("./aadu-puli-3d/Board"), { loading: Loading }),
   chess: dynamic(() => import("./chess/Board"), { loading: Loading }),
+  "chess-3d": dynamic(() => import("./chess-3d/Board"), { loading: Loading }),
   kazhuthai: dynamic(() => import("./kazhuthai/Board"), { loading: Loading }),
   onnu: dynamic(() => import("./onnu/Board"), { loading: Loading }),
   rummy: dynamic(() => import("./rummy/Board"), { loading: Loading }),

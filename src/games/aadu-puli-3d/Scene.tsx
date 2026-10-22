@@ -6,9 +6,9 @@ import * as THREE from "three";
 import { ADJ } from "../aadu-puli/board";
 import type { AaduPuliState } from "../aadu-puli/logic";
 import { Forest } from "./Forest";
-import { POINTS_3D, STONE_TOP } from "./layout";
+import { POINTS_3D, SPREAD, STONE_TOP } from "./layout";
 import { CapturedPen, DyingGoat, Piece } from "./Pieces";
-import { ViewRig, type ViewApi } from "./ViewRig";
+import { ViewRig, type ViewApi } from "../three/ViewRig";
 
 /** Pulsing ring on a point: where to move (gold), a capture (red) or a piece you can pick. */
 function Ring({ x, z, color, radius, pulse }: { x: number; z: number; color: string; radius: number; pulse: number }) {
@@ -63,7 +63,7 @@ export default function AaduPuliScene({
 
   return (
     <Canvas shadows="percentage" dpr={[1, 1.75]} camera={{ fov: 38, near: 0.5, far: 120 }} gl={{ antialias: true }} className="touch-manipulation">
-      <ViewRig apiRef={viewApi} />
+      <ViewRig apiRef={viewApi} halfWidth={8.4 * SPREAD} halfDepth={7.6 * SPREAD} />
       <color attach="background" args={["#a9c9e0"]} />
       <fog attach="fog" args={["#a9c9e0", 42, 84]} />
       <hemisphereLight args={["#d6e8f7", "#3a5a24", 1.1]} />

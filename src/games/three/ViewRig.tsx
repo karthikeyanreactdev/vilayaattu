@@ -5,7 +5,6 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useLayoutEffect, useMemo, useRef, type RefObject } from "react";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { SPREAD } from "./layout";
 
 /** Buttons outside the canvas drive the camera through this. */
 export type ViewApi = {
@@ -15,10 +14,25 @@ export type ViewApi = {
 };
 
 const TARGET = new THREE.Vector3(0, 0, 0);
-const ELEVATION = THREE.MathUtils.degToRad(52);
 
-/** Drag to orbit, pinch or scroll to zoom; starts framed so the whole board fits. */
-export function ViewRig({ apiRef }: { apiRef: RefObject<ViewApi | null> }) {
+/**
+ * Drag to orbit, pinch or scroll to zoom; starts framed so a board of the given
+ * half width and half depth fits, seen from `azimuth` (0 looks from +Z).
+ */
+export function ViewRig({
+  apiRef,
+  halfWidth,
+  halfDepth,
+  elevation = 52,
+  azimuth = 0,
+}: {
+  apiRef: RefObject<ViewApi | null>;
+  halfWidth: number;
+  halfDepth: number;
+  /** Degrees above the ground. */
+  elevation?: number;
+  azimuth?: number;
+}) {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const size = useThree((s) => s.size);
   const controls = useRef<OrbitControlsImpl>(null);
@@ -28,10 +42,10 @@ export function ViewRig({ apiRef }: { apiRef: RefObject<ViewApi | null> }) {
   // Distance at which the whole board fits this canvas shape.
   const fit = useMemo(() => {
     const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    return Math.max((8.4 * SPREAD) / (tan * (size.width / size.height)), (7.6 * SPREAD) / tan);
-  }, [camera, size]);
+    return Math.max(halfWidth / (tan * (size.width / size.height)), halfDepth / tan);
+  }, [camera, size, halfWidth, halfDepth]);
 
-  const home = useCallback(() => new THREE.Spherical(fit, Math.PI / 2 - ELEVATION, 0), [fit]);
+  const home = useCallback(() => new THREE.Spherical(fit, Math.PI / 2 - THREE.MathUtils.degToRad(elevation), azimuth), [fit, elevation, azimuth]);
 
   useLayoutEffect(() => {
     const s = home();
