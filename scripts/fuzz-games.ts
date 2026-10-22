@@ -12,7 +12,7 @@ const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
 function candidates(id: string, s: any, by: string): any[] {
   switch (id) {
     case "hand-cricket":
-      return [{ type: "call", call: pick(["odd", "even"]) }, { type: "toss-pick", n: 1 + Math.floor(Math.random() * 6) }, { type: "choose", choice: pick(["bat", "bowl"]) }, { type: "pick", n: 1 + Math.floor(Math.random() * 6) }];
+      return [{ type: "call", call: pick(["heads", "tails"]) }, { type: "choose", choice: pick(["bat", "bowl"]) }, { type: "pick", n: 1 + Math.floor(Math.random() * 6) }];
     case "book-cricket":
       return [{ type: "flip" }];
     case "ludo":

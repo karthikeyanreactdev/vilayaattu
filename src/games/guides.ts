@@ -15,7 +15,7 @@ export const GUIDES: Record<string, GameGuide> = {
     goal: "Score more runs than your friend by guessing what they won't show.",
     controls: [
       "Tap a hand (1–6) to show your fingers. Your choice stays hidden until both of you pick.",
-      "During the toss, the caller taps Odd or Even first.",
+      "During the toss, the caller taps Heads or Tails. The coin flip picks the winner.",
     ],
     tips: [
       "Batting: big numbers score fast, but they're also the obvious guess.",
@@ -111,6 +111,7 @@ export const GUIDES: Record<string, GameGuide> = {
     controls: [
       "When it's your turn, playable cards lift up. Tap one to play it.",
       "Cards you can't play are dimmed.",
+      "A 15-second timer runs on every turn. If it hits zero, your lowest legal card is played. If none can be played, the turn moves on.",
     ],
     tips: [
       "Cutting with a high card of another suit hurts the most: the picker gets everything.",

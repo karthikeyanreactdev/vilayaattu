@@ -23,8 +23,7 @@ function weighted(weights: number[]): number {
  */
 export const handCricketBot: GameBot<HandCricketState, HandCricketAction> = (s, me, level) => {
   if (s.status !== "playing") return null;
-  if (s.phase === "toss-call") return s.toss.caller === me ? { type: "call", call: pickRandom(["odd", "even"] as const) } : null;
-  if (s.phase === "toss-pick") return s.toss.picks[me] === null ? { type: "toss-pick", n: pickRandom(NUMBERS) } : null;
+  if (s.phase === "toss-call") return s.toss.caller === me ? { type: "call", call: pickRandom(["heads", "tails"] as const) } : null;
   if (s.phase === "choose") return s.toss.winner === me ? { type: "choose", choice: level === "beginner" ? pickRandom(["bat", "bowl"] as const) : "bowl" } : null;
   if (!s.cricket || s.picks[me] !== null) return null;
 

@@ -1,24 +1,26 @@
+import { randomInt } from "@/lib/random";
 import { bump, fail, finish } from "../helpers";
 import type { BaseGameState, GameRules, PlayerId, PlayerRef } from "../types";
 import { createCore, CRICKET_OPTIONS, currentInnings, recordBall, type CricketCore } from "../cricket/engine";
 
 /**
- * Hand Cricket (odd or even). Both players secretly show 1–6 fingers.
- * Same number = OUT, otherwise the batter scores their number.
+ * Hand Cricket. The toss is a coin (heads or tails). During play both players
+ * secretly show 1–6 fingers. Same number = OUT, otherwise the batter scores theirs.
  */
+
+export type CoinFace = "heads" | "tails";
 
 /** -1 means "picked but hidden from you". */
 export type Picks = Record<PlayerId, number | null>;
 
 export type HandCricketState = BaseGameState & {
   players: PlayerRef[];
-  phase: "toss-call" | "toss-pick" | "choose" | "play";
+  phase: "toss-call" | "choose" | "play";
   toss: {
     caller: PlayerId;
-    call: "odd" | "even" | null;
-    picks: Picks;
+    call: CoinFace | null;
+    face: CoinFace | null;
     winner: PlayerId | null;
-    sum: number | null;
   };
   picks: Picks;
   lastBall: { bat: number; bowl: number; runs: number; out: boolean; moveNo: number; batter: PlayerId; bowler: PlayerId } | null;
@@ -27,10 +29,11 @@ export type HandCricketState = BaseGameState & {
 };
 
 export type HandCricketAction =
-  | { type: "call"; call: "odd" | "even" }
-  | { type: "toss-pick"; n: number }
+  | { type: "call"; call: CoinFace }
   | { type: "choose"; choice: "bat" | "bowl" }
   | { type: "pick"; n: number };
+
+const isFace = (call: unknown): call is CoinFace => call === "heads" || call === "tails";
 
 const validNumber = (n: unknown) => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= 6;
 const emptyPicks = (players: PlayerRef[]): Picks => Object.fromEntries(players.map((p) => [p.id, null]));
@@ -40,7 +43,7 @@ export const handCricket: GameRules<HandCricketState, HandCricketAction> = {
     id: "hand-cricket",
     name: "Hand Cricket",
     tamilName: "கை கிரிக்கெட்",
-    tagline: "Odd or even, show your fingers, don't get out!",
+    tagline: "Call the coin, show your fingers, don't get out!",
     emoji: "✋",
     category: "Cricket",
     minPlayers: 2,
@@ -49,7 +52,7 @@ export const handCricket: GameRules<HandCricketState, HandCricketAction> = {
     duration: "3–5",
     accent: "from-emerald-500 to-teal-600",
     rules: [
-      "Toss: one player calls odd or even, then both show 1–6 fingers. The sum decides the toss.",
+      "Toss: one player calls heads or tails. A coin flip decides who wins the toss.",
       "The toss winner chooses to bat or bowl.",
       "Each ball, both pick a number secretly. Same number = OUT.",
       "Different numbers: the batter scores the number they showed.",
@@ -66,7 +69,7 @@ export const handCricket: GameRules<HandCricketState, HandCricketAction> = {
       moveNo: 0,
       players,
       phase: "toss-call",
-      toss: { caller: players[1].id, call: null, picks: emptyPicks(players), winner: null, sum: null },
+      toss: { caller: players[1].id, call: null, face: null, winner: null },
       picks: emptyPicks(players),
       lastBall: null,
       cricket: null,
@@ -81,21 +84,11 @@ export const handCricket: GameRules<HandCricketState, HandCricketAction> = {
       case "call": {
         if (state.phase !== "toss-call") return fail("Not the time to call.");
         if (by !== state.toss.caller) return fail("Your opponent calls the toss.");
-        return bump({ ...state, phase: "toss-pick" as const, toss: { ...state.toss, call: action.call } });
-      }
-      case "toss-pick": {
-        if (state.phase !== "toss-pick") return fail("Not the time to pick.");
-        if (!validNumber(action.n)) return fail("Pick 1 to 6.");
-        if (state.toss.picks[by] !== null) return fail("You already picked.");
-        const picks = { ...state.toss.picks, [by]: action.n };
-        const values = Object.values(picks);
-        if (values.some((v) => v === null)) return bump({ ...state, toss: { ...state.toss, picks } });
-        const sum = (values as number[]).reduce((a, b) => a + b, 0);
-        const isEven = sum % 2 === 0;
-        const callerWins = (state.toss.call === "even") === isEven;
+        if (!isFace(action.call)) return fail("Call heads or tails.");
+        const face: CoinFace = randomInt(0, 1) === 0 ? "heads" : "tails";
         const other = state.players.find((p) => p.id !== state.toss.caller)!.id;
-        const winner = callerWins ? state.toss.caller : other;
-        return bump({ ...state, phase: "choose" as const, toss: { ...state.toss, picks, sum, winner } });
+        const winner = face === action.call ? state.toss.caller : other;
+        return bump({ ...state, phase: "choose" as const, toss: { ...state.toss, call: action.call, face, winner } });
       }
       case "choose": {
         if (state.phase !== "choose") return fail("Not the time to choose.");
@@ -141,11 +134,6 @@ export const handCricket: GameRules<HandCricketState, HandCricketAction> = {
       Object.fromEntries(
         Object.entries(picks).map(([id, v]) => [id, id === viewer || v === null ? v : -1]),
       );
-    const tossDone = state.toss.winner !== null;
-    return {
-      ...state,
-      picks: hide(state.picks),
-      toss: { ...state.toss, picks: tossDone ? state.toss.picks : hide(state.toss.picks) },
-    };
+    return { ...state, picks: hide(state.picks) };
   },
 };

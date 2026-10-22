@@ -11,9 +11,47 @@ import { playerName } from "../helpers";
 import type { GameBoardProps } from "../types";
 import { Scoreboard } from "../cricket/Scoreboard";
 import { currentInnings } from "../cricket/engine";
-import type { HandCricketAction, HandCricketState } from "./logic";
+import type { CoinFace, HandCricketAction, HandCricketState } from "./logic";
 
 const HANDS: Record<number, string> = { 1: "☝️", 2: "✌️", 3: "🤟", 4: "🖖", 5: "🖐️", 6: "👍" };
+
+/** Gold coin. `face` null keeps it spinning; a face lands on that side. */
+function TossCoin({ face }: { face: CoinFace | null }) {
+  const spinning = face === null;
+  const end = face === "tails" ? 1980 : 1800;
+  return (
+    <div className="mx-auto size-32 [perspective:800px]" data-coin={face ?? "spinning"}>
+      <motion.div
+        className="relative size-full [transform-style:preserve-3d]"
+        animate={{ rotateY: spinning ? [0, 360] : end }}
+        transition={spinning ? { duration: 0.45, repeat: Infinity, ease: "linear" } : { duration: 1.15, ease: [0.15, 0.7, 0.2, 1] }}
+      >
+        <CoinSide side="heads" />
+        <CoinSide side="tails" />
+      </motion.div>
+    </div>
+  );
+}
+
+function CoinSide({ side }: { side: CoinFace }) {
+  const heads = side === "heads";
+  return (
+    <div
+      className={cn(
+        "absolute inset-0 grid place-items-center rounded-full border-[6px] shadow-[inset_0_0_0_4px_rgba(255,255,255,0.35),0_10px_24px_rgba(0,0,0,0.35)] [backface-visibility:hidden]",
+        heads
+          ? "border-amber-100 bg-gradient-to-br from-amber-200 via-amber-400 to-amber-700 text-amber-950"
+          : "border-slate-200 bg-gradient-to-br from-slate-100 via-slate-300 to-slate-500 text-slate-800 [transform:rotateY(180deg)]",
+      )}
+      aria-hidden
+    >
+      <div className="flex size-[78%] flex-col items-center justify-center rounded-full border-2 border-dashed border-current/50">
+        <span className="text-4xl leading-none">{heads ? "👑" : "🪶"}</span>
+        <span className="mt-1 text-[11px] font-black tracking-[0.22em]">{heads ? "HEADS" : "TAILS"}</span>
+      </div>
+    </div>
+  );
+}
 
 function HandPicker({ disabled, picked, onPick }: { disabled: boolean; picked: number | null; onPick: (n: number) => void }) {
   return (
@@ -82,7 +120,6 @@ export default function HandCricketBoard({ state, me, players, send }: GameBoard
   const play = useSound();
   const [showReveal, setShowReveal] = useState(false);
   const lastSeen = useRef(state.lastBall?.moveNo ?? 0);
-  const isPlayer = state.players.some((p) => p.id === me);
   const opponent = state.players.find((p) => p.id !== me) ?? state.players[1];
 
   // Animate each new ball.
@@ -99,52 +136,54 @@ export default function HandCricketBoard({ state, me, players, send }: GameBoard
   const { phase, toss } = state;
   const finished = state.status === "finished";
 
-  if (phase === "toss-call" || phase === "toss-pick" || phase === "choose") {
+  useEffect(() => {
+    if (phase !== "choose" || !toss.face) return;
+    play("coin");
+  }, [phase, toss.face, play]);
+
+  if (phase === "toss-call" || phase === "choose") {
     const caller = playerName(players, toss.caller);
-    const myTossPick = toss.picks[me];
-    const oppTossPick = toss.picks[opponent.id];
+    const faceLabel = toss.face === "heads" ? "Heads" : "Tails";
+    const callLabel = toss.call === "heads" ? "Heads" : "Tails";
     return (
-      <div className="mx-auto grid w-full max-w-lg gap-5 p-4">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-emerald-600 to-emerald-800 p-6 text-center text-white shadow-xl">
-          <motion.div
-            className="mx-auto grid size-20 place-items-center rounded-full bg-gradient-to-br from-amber-300 to-amber-600 text-3xl font-black text-amber-950 shadow-lg"
-            animate={{ rotateY: phase === "choose" ? 0 : [0, 360] }}
-            transition={{ duration: 1.2, repeat: phase === "choose" ? 0 : Infinity, ease: "linear" }}
-          >
-            ₹
-          </motion.div>
+      <div className="mx-auto grid w-full max-w-lg gap-5 p-4 max-sm:pt-44" data-toss={phase}>
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-emerald-700 to-emerald-950 p-6 text-center text-white shadow-xl">
+          <TossCoin face={phase === "choose" ? toss.face : null} />
           <h2 className="mt-4 text-2xl font-black">Toss time</h2>
-          <p className="mt-1 text-sm text-white/80">
-            {phase === "toss-call" && `${caller} calls odd or even`}
-            {phase === "toss-pick" && `${caller} called ${toss.call?.toUpperCase()}. Both show your fingers!`}
-            {phase === "choose" &&
-              `${toss.picks[state.players[0].id]} + ${toss.picks[state.players[1].id]} = ${toss.sum} (${toss.sum! % 2 === 0 ? "even" : "odd"})`}
+          <p className="mt-1 text-sm text-white/80" aria-live="polite">
+            {phase === "toss-call" && (toss.caller === me ? "Call it. Heads or tails?" : `${caller} is calling the toss`)}
+            {phase === "choose" && `${caller} called ${callLabel}. It's ${faceLabel}.`}
           </p>
         </div>
 
         {phase === "toss-call" &&
           (toss.caller === me ? (
             <div className="grid grid-cols-2 gap-3">
-              {(["odd", "even"] as const).map((c) => (
-                <Button key={c} size="lg" className="h-16 text-xl font-black uppercase" onClick={() => { play("select"); send({ type: "call", call: c }); }}>
-                  {c}
-                </Button>
-              ))}
+              <Button
+                size="lg"
+                className="h-20 bg-gradient-to-b from-amber-300 to-amber-600 text-xl font-black text-amber-950 hover:from-amber-200 hover:to-amber-500"
+                onClick={() => {
+                  play("select");
+                  send({ type: "call", call: "heads" });
+                }}
+              >
+                <span className="text-2xl" aria-hidden>👑</span> Heads
+              </Button>
+              <Button
+                size="lg"
+                variant="secondary"
+                className="h-20 text-xl font-black"
+                onClick={() => {
+                  play("select");
+                  send({ type: "call", call: "tails" });
+                }}
+              >
+                <span className="text-2xl" aria-hidden>🪶</span> Tails
+              </Button>
             </div>
           ) : (
-            <TurnBanner myTurn={false} waitingText={`Waiting for ${caller} to call…`} />
+            <TurnBanner myTurn={false} waitingText={`Waiting for ${caller} to call heads or tails…`} />
           ))}
-
-        {phase === "toss-pick" && isPlayer && (
-          <>
-            <TurnBanner
-              myTurn={myTossPick === null}
-              myTurnText="Show your fingers"
-              waitingText={oppTossPick === null ? `Waiting for ${opponent.name}…` : "Revealing…"}
-            />
-            <HandPicker disabled={myTossPick !== null} picked={myTossPick ?? null} onPick={(n) => { play("tap"); send({ type: "toss-pick", n }); }} />
-          </>
-        )}
 
         {phase === "choose" && (
           <div className="grid gap-3 text-center">
