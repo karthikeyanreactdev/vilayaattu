@@ -157,3 +157,6 @@ export const GUIDES: Record<string, GameGuide> = {
     ],
   },
 };
+
+// Same game on the 3D forest board.
+GUIDES["aadu-puli-3d"] = GUIDES["aadu-puli"];

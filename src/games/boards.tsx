@@ -23,6 +23,7 @@ export const BOARDS: Record<string, AnyBoard> = {
   ludo: dynamic(() => import("./ludo/Board"), { loading: Loading }),
   pallanguzhi: dynamic(() => import("./pallanguzhi/Board"), { loading: Loading }),
   "aadu-puli": dynamic(() => import("./aadu-puli/Board"), { loading: Loading }),
+  "aadu-puli-3d": dynamic(() => import("./aadu-puli-3d/Board"), { loading: Loading }),
   chess: dynamic(() => import("./chess/Board"), { loading: Loading }),
   kazhuthai: dynamic(() => import("./kazhuthai/Board"), { loading: Loading }),
   onnu: dynamic(() => import("./onnu/Board"), { loading: Loading }),

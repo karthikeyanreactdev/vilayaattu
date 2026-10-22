@@ -4,6 +4,7 @@ import { bookCricket } from "./book-cricket/logic";
 import { ludo } from "./ludo/logic";
 import { pallanguzhi } from "./pallanguzhi/logic";
 import { aaduPuli } from "./aadu-puli/logic";
+import { aaduPuli3d } from "./aadu-puli-3d/logic";
 import { chessGame } from "./chess/logic";
 import { kazhuthai } from "./kazhuthai/logic";
 import { onnu } from "./onnu/logic";
@@ -30,6 +31,7 @@ export const GAMES: AnyGameDefinition[] = [
   withBot(ludo, ludoBot),
   withBot(pallanguzhi, pallanguzhiBot),
   withBot(aaduPuli, aaduPuliBot),
+  withBot(aaduPuli3d, aaduPuliBot),
   withBot(chessGame, chessBot),
   withBot(kazhuthai, kazhuthaiBot),
   withBot(onnu, onnuBot),
