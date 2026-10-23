@@ -20,7 +20,7 @@ import { GameCatalog } from "./GameCatalog";
 import { LanguagePicker } from "./LanguagePicker";
 import { QuickPlayDialog, TableSizeDialog, VsComputerDialog } from "./PlayDialogs";
 
-const FLOATERS = ["chess", "aadu-puli", "onnu", "hand-cricket", "pallanguzhi", "ludo", "kazhuthai", "book-cricket"];
+const FLOATERS = ["chess", "aadu-puli", "onnu", "hand-cricket", "pallanguzhi", "ludo", "kazhuthai", "book-cricket", "asteroids", "coast-run"];
 
 export function HomeScreen() {
   const user = useAppSelector((s) => s.user);

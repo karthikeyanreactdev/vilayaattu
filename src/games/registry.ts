@@ -10,6 +10,8 @@ import { chess3d } from "./chess-3d/logic";
 import { kazhuthai } from "./kazhuthai/logic";
 import { onnu } from "./onnu/logic";
 import { rummy } from "./rummy/logic";
+import { asteroids } from "./asteroids/logic";
+import { coastRun } from "./coast-run/logic";
 import { handCricketBot } from "./hand-cricket/bot";
 import { bookCricketBot } from "./book-cricket/bot";
 import { ludoBot } from "./ludo/bot";
@@ -19,6 +21,8 @@ import { chessBot } from "./chess/bot";
 import { kazhuthaiBot } from "./kazhuthai/bot";
 import { onnuBot } from "./onnu/bot";
 import { rummyBot } from "./rummy/bot";
+import { asteroidsBot } from "./asteroids/bot";
+import { coastRunBot } from "./coast-run/bot";
 
 const withBot = <S extends BaseGameState, A>(rules: GameRules<S, A>, bot: GameBot<S, A>): GameDefinition<S, A> => ({ ...rules, bot });
 
@@ -38,6 +42,8 @@ export const GAMES: AnyGameDefinition[] = [
   withBot(kazhuthai, kazhuthaiBot),
   withBot(onnu, onnuBot),
   withBot(rummy, rummyBot),
+  withBot(asteroids, asteroidsBot),
+  withBot(coastRun, coastRunBot),
 ];
 
 const byId = new Map(GAMES.map((g) => [g.meta.id, g]));
@@ -46,7 +52,7 @@ export function getGameDefinition(id: string): AnyGameDefinition | undefined {
   return byId.get(id);
 }
 
-export const CATEGORIES: GameCategory[] = ["Tamil classics", "Cricket", "Strategy", "Cards"];
+export const CATEGORIES: GameCategory[] = ["Tamil classics", "Cricket", "Strategy", "Cards", "Arcade"];
 
 export function gamesForPlayers(count: number): AnyGameDefinition[] {
   return GAMES.filter((g) => count >= g.meta.minPlayers && count <= g.meta.maxPlayers);

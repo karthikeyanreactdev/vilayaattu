@@ -11,6 +11,38 @@ export type GameGuide = {
 };
 
 export const GUIDES: Record<string, GameGuide> = {
+  asteroids: {
+    goal: "Score more than the other pilots in one run each.",
+    controls: [
+      "Tap Start flying. Left and Right turn the ship. Thrust burns forward. Fire shoots.",
+      "On a keyboard: A/D or arrow keys turn, W or Up thrusts, Space fires.",
+    ],
+    tips: [
+      "Big rocks split into two. Clear the small ones before they crowd you.",
+      "Flying off the edge wraps around to the other side.",
+      "You get three ships. A fresh ship blinks and cannot be hit for a moment.",
+    ],
+    terms: [
+      { term: "Wave", meaning: "A fresh set of rocks after the field is clear." },
+      { term: "Run", meaning: "Your 60-second turn. Then the next player flies." },
+    ],
+  },
+  "coast-run": {
+    goal: "Finish the coast in the shortest time. Everyone races the same road.",
+    controls: [
+      "Tap Start engine. Left and Right steer. Gas speeds up. Brake slows you.",
+      "On a keyboard: A/D or arrows steer, W or Up is gas, S or Down brakes.",
+    ],
+    tips: [
+      "The grass is slow. Get back on the asphalt before the next curve.",
+      "Ease off through a sharp bend. Full speed on the straights.",
+      "A hill hides the road. Trust the bend you just saw.",
+    ],
+    terms: [
+      { term: "DNF", meaning: "Did not finish before the clock ran out. Finishers rank ahead." },
+      { term: "Same track", meaning: "The computer and every friend drive the course you see." },
+    ],
+  },
   "hand-cricket": {
     goal: "Score more runs than your friend by guessing what they won't show.",
     controls: [

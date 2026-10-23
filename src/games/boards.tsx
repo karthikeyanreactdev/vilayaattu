@@ -29,4 +29,6 @@ export const BOARDS: Record<string, AnyBoard> = {
   kazhuthai: dynamic(() => import("./kazhuthai/Board"), { loading: Loading }),
   onnu: dynamic(() => import("./onnu/Board"), { loading: Loading }),
   rummy: dynamic(() => import("./rummy/Board"), { loading: Loading }),
+  asteroids: dynamic(() => import("./asteroids/Board"), { loading: Loading }),
+  "coast-run": dynamic(() => import("./coast-run/Board"), { loading: Loading }),
 };

@@ -57,7 +57,7 @@ export type OptionField =
 
 export type GameOptions = Record<string, string | number | boolean>;
 
-export type GameCategory = "Tamil classics" | "Cricket" | "Strategy" | "Cards";
+export type GameCategory = "Tamil classics" | "Cricket" | "Strategy" | "Cards" | "Arcade";
 
 export type GameMeta = {
   id: string;

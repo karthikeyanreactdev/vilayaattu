@@ -21,7 +21,7 @@ export type HomeCopy = {
   games: string;
   gamesHint: string;
   all: string;
-  categories: Record<"Tamil classics" | "Cricket" | "Strategy" | "Cards", string>;
+  categories: Record<"Tamil classics" | "Cricket" | "Strategy" | "Cards" | "Arcade", string>;
   online: string;
   computer: string;
   players: string;
@@ -51,7 +51,7 @@ export const HOME: Record<Locale, HomeCopy> = {
     games: "Games",
     gamesHint: "Play vs friends, or play vs computer.",
     all: "All",
-    categories: { "Tamil classics": "Classics", Cricket: "Cricket", Strategy: "Strategy", Cards: "Cards" },
+    categories: { "Tamil classics": "Classics", Cricket: "Cricket", Strategy: "Strategy", Cards: "Cards", Arcade: "Arcade" },
     online: "Play vs friends",
     computer: "Play vs computer",
     players: "players",
@@ -79,7 +79,7 @@ export const HOME: Record<Locale, HomeCopy> = {
     games: "ஆட்டங்கள்",
     gamesHint: "நண்பர்களுடன் ஆடு, அல்லது கணினியுடன் ஆடு.",
     all: "அனைத்தும்",
-    categories: { "Tamil classics": "தமிழ் ஆட்டம்", Cricket: "கிரிக்கெட்", Strategy: "உத்தி", Cards: "சீட்டு" },
+    categories: { "Tamil classics": "தமிழ் ஆட்டம்", Cricket: "கிரிக்கெட்", Strategy: "உத்தி", Cards: "சீட்டு", Arcade: "ஆர்கேட்" },
     online: "நண்பர்களுடன் ஆடு",
     computer: "கணினியுடன் ஆடு",
     players: "பேர்",
@@ -107,7 +107,7 @@ export const HOME: Record<Locale, HomeCopy> = {
     games: "खेल",
     gamesHint: "दोस्तों से खेलें, या कंप्यूटर से खेलें।",
     all: "सभी",
-    categories: { "Tamil classics": "क्लासिक", Cricket: "क्रिकेट", Strategy: "रणनीति", Cards: "पत्ते" },
+    categories: { "Tamil classics": "क्लासिक", Cricket: "क्रिकेट", Strategy: "रणनीति", Cards: "पत्ते", Arcade: "आर्केड" },
     online: "दोस्तों से खेलें",
     computer: "कंप्यूटर से खेलें",
     players: "खिलाड़ी",
@@ -135,7 +135,7 @@ export const HOME: Record<Locale, HomeCopy> = {
     games: "കളികൾ",
     gamesHint: "കൂട്ടുകാരോട് കളിക്കൂ, അല്ലെങ്കിൽ കമ്പ്യൂട്ടറിനോട് കളിക്കൂ.",
     all: "എല്ലാം",
-    categories: { "Tamil classics": "ക്ലാസിക്", Cricket: "ക്രിക്കറ്റ്", Strategy: "തന്ത്രം", Cards: "ചീട്ട്" },
+    categories: { "Tamil classics": "ക്ലാസിക്", Cricket: "ക്രിക്കറ്റ്", Strategy: "തന്ത്രം", Cards: "ചീട്ട്", Arcade: "ആർക്കേഡ്" },
     online: "കൂട്ടുകാരോട് കളി",
     computer: "കമ്പ്യൂട്ടറിനോട് കളി",
     players: "പേർ",
@@ -163,7 +163,7 @@ export const HOME: Record<Locale, HomeCopy> = {
     games: "ಆಟಗಳು",
     gamesHint: "ಸ್ನೇಹಿತರ ಜೊತೆ ಆಡಿ, ಅಥವಾ ಕಂಪ್ಯೂಟರ್ ಜೊತೆ ಆಡಿ.",
     all: "ಎಲ್ಲಾ",
-    categories: { "Tamil classics": "ಕ್ಲಾಸಿಕ್", Cricket: "ಕ್ರಿಕೆಟ್", Strategy: "ತಂತ್ರ", Cards: "ಎಲೆ" },
+    categories: { "Tamil classics": "ಕ್ಲಾಸಿಕ್", Cricket: "ಕ್ರಿಕೆಟ್", Strategy: "ತಂತ್ರ", Cards: "ಎಲೆ", Arcade: "ಆರ್ಕೇಡ್" },
     online: "ಸ್ನೇಹಿತರ ಜೊತೆ",
     computer: "ಕಂಪ್ಯೂಟರ್ ಜೊತೆ",
     players: "ಜನ",
@@ -191,7 +191,7 @@ export const HOME: Record<Locale, HomeCopy> = {
     games: "ఆటలు",
     gamesHint: "స్నేహితులతో ఆడండి, లేదా కంప్యూటర్‌తో ఆడండి.",
     all: "అన్నీ",
-    categories: { "Tamil classics": "క్లాసిక్", Cricket: "క్రికెట్", Strategy: "వ్యూహం", Cards: "పేక" },
+    categories: { "Tamil classics": "క్లాసిక్", Cricket: "క్రికెట్", Strategy: "వ్యూహం", Cards: "పేక", Arcade: "ఆర్కేడ్" },
     online: "స్నేహితులతో ఆడండి",
     computer: "కంప్యూటర్‌తో ఆడండి",
     players: "మంది",
