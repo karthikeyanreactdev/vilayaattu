@@ -1,25 +1,64 @@
 import { randomInt } from "@/lib/random";
-import { bankMark, currentRunner, setupRuns, type RunState } from "../arcade/runs";
-import { fail } from "../helpers";
-import type { GameRules } from "../types";
-import { formatMark } from "./sim";
+import { bump, fail, finish } from "../helpers";
+import type { BaseGameState, GameResult, GameRules, PlayerRef } from "../types";
+import { formatMark, MAX_SPEED, RACE_LIMIT } from "./sim";
 
-/** Each player races the same coast. Lowest time wins. */
-export const RACE_LIMIT_MS = 100_000;
+/** Shared clock. A little longer than the local race so a slow phone can still bank. */
+export const RACE_LIMIT_MS = (RACE_LIMIT + 8) * 1000;
 const MARK_HI = 400_000;
+const LIGHTS_MS = 3500;
+/** How far a reported car may sit along the road. */
+const Z_CAP = 200 * 4000;
 
-export type CoastState = RunState;
-export type CoastAction = { type: "finish"; mark: number };
+export type RacerSpot = {
+  z: number;
+  x: number;
+  speed: number;
+  done: boolean;
+  /** null until that seat banks a time. */
+  mark: number | null;
+};
+
+export type CoastState = BaseGameState & {
+  players: PlayerRef[];
+  seed: number;
+  /** Host clock when the lights go green. */
+  startAt: number;
+  deadline: number;
+  spots: RacerSpot[];
+};
+
+export type CoastAction =
+  | { type: "spot"; z: number; x: number; speed: number; done: boolean }
+  | { type: "finish"; mark: number };
 
 const label = (m: number) => formatMark(m);
 const title = (m: number) => (m >= 200_000 ? "No finish" : formatMark(m));
+
+function blankSpot(): RacerSpot {
+  return { z: 0, x: 0, speed: 0, done: false, mark: null };
+}
+
+function ranked(state: CoastState, ctxNow: number): CoastState {
+  if (state.spots.some((s) => s.mark == null)) return state;
+  const marks = state.spots.map((s) => s.mark ?? MARK_HI);
+  const order = marks.map((m, i) => ({ m, i })).sort((a, b) => a.m - b.m);
+  const best = order[0]?.m ?? MARK_HI;
+  const winners = order.filter((r) => r.m === best).map((r) => state.players[r.i].id);
+  const result: GameResult = {
+    winners,
+    title: winners.length > 1 ? "Draw" : title(best),
+    scores: state.players.map((p, i) => ({ playerId: p.id, label: label(marks[i]) })),
+  };
+  return bump(finish({ ...state, deadline: ctxNow }, result));
+}
 
 export const coastRun: GameRules<CoastState, CoastAction> = {
   meta: {
     id: "coast-run",
     name: "Coast Run",
     tamilName: "கடலோட்டம்",
-    tagline: "Pseudo-3D coast road. Same track, best time wins.",
+    tagline: "Same coast, every car in one view. Best time wins.",
     emoji: "🏎️",
     category: "Arcade",
     minPlayers: 2,
@@ -28,30 +67,65 @@ export const coastRun: GameRules<CoastState, CoastAction> = {
     duration: "3–8",
     accent: "from-orange-500 to-rose-600",
     rules: [
-      "Take turns on the same road. Steer through the curves and stay on the asphalt.",
-      "Grass cuts your speed. Hills hide the next bend.",
+      "Everyone leaves the line together. Friends and the computer stay on your screen.",
+      "Steer through the curves and stay on the asphalt. Grass cuts your speed.",
       "Cross the finish line. The clock stops. Did not finish sorts behind every finisher.",
-      "The computer drives the same course.",
     ],
   },
   defaultOptions: {},
   optionFields: [],
+  /** The computer banks its time at once. The picture of its car is drawn locally. */
+  live: true,
 
   setup(players, _options, ctx) {
-    return setupRuns(players, ctx.now, randomInt(1, 1_000_000_000), RACE_LIMIT_MS);
+    const ordered = [...players].sort((a, b) => a.seat - b.seat);
+    const startAt = ctx.now + LIGHTS_MS;
+    return {
+      status: "playing",
+      result: null,
+      moveNo: 0,
+      players: ordered,
+      seed: randomInt(1, 1_000_000_000),
+      startAt,
+      deadline: startAt + RACE_LIMIT_MS,
+      spots: ordered.map(() => blankSpot()),
+    };
   },
 
   reduce(state, action, by, ctx) {
-    if (action.type !== "finish") return fail("Unknown move.");
-    return bankMark(state, by, action.mark, ctx, RACE_LIMIT_MS, true, label, title, 1, MARK_HI);
+    if (state.status !== "playing") return fail("The race is over.");
+    const seat = state.players.findIndex((p) => p.id === by);
+    if (seat < 0) return fail("You are not in this race.");
+    const spots = state.spots.slice();
+    const mine = { ...spots[seat] };
+    if (mine.mark != null) return fail("That run is already in.");
+
+    if (action.type === "spot") {
+      if (!Number.isFinite(action.z) || !Number.isFinite(action.x) || !Number.isFinite(action.speed)) return fail("That position does not count.");
+      const z = Math.max(mine.z, Math.min(Z_CAP, action.z));
+      mine.z = z;
+      mine.x = Math.max(-2, Math.min(2, action.x));
+      mine.speed = Math.max(0, Math.min(MAX_SPEED, action.speed));
+      mine.done = action.done || mine.done;
+      spots[seat] = mine;
+      return { ...state, spots };
+    }
+
+    if (action.type === "finish") {
+      if (!Number.isFinite(action.mark)) return fail("That time does not count.");
+      mine.mark = Math.max(1, Math.min(MARK_HI, Math.round(action.mark)));
+      mine.done = true;
+      spots[seat] = mine;
+      return ranked({ ...state, spots }, ctx.now);
+    }
+
+    return fail("Unknown move.");
   },
 
   tick(state, ctx) {
     if (state.status !== "playing" || ctx.now < state.deadline) return null;
-    const seat = currentRunner(state);
-    if (!seat) return null;
-    const next = bankMark(state, seat.id, MARK_HI, ctx, RACE_LIMIT_MS, true, label, title, 1, MARK_HI);
-    return "error" in next ? null : next;
+    const spots = state.spots.map((s) => (s.mark == null ? { ...s, done: true, mark: MARK_HI } : s));
+    return ranked({ ...state, spots }, ctx.now);
   },
 
   view: (state) => state,

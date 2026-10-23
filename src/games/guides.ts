@@ -28,15 +28,15 @@ export const GUIDES: Record<string, GameGuide> = {
     ],
   },
   "coast-run": {
-    goal: "Finish the coast in the shortest time. Everyone races the same road.",
+    goal: "Finish the coast in the shortest time. Every car is on the same road.",
     controls: [
-      "Tap Start engine. Left and Right steer. Gas speeds up. Brake slows you.",
+      "Wait for the lights. Left and Right steer. Gas speeds up. Brake slows you.",
       "On a keyboard: A/D or arrows steer, W or Up is gas, S or Down brakes.",
     ],
     tips: [
+      "Friends and the computer start with you. Their cars stay in your view.",
       "The grass is slow. Get back on the asphalt before the next curve.",
       "Ease off through a sharp bend. Full speed on the straights.",
-      "A hill hides the road. Trust the bend you just saw.",
     ],
     terms: [
       { term: "DNF", meaning: "Did not finish before the clock ran out. Finishers rank ahead." },

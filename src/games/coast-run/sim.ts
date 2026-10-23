@@ -130,36 +130,34 @@ export function formatMark(mark: number): string {
   return `${m}:${s.toFixed(2).padStart(5, "0")}`;
 }
 
+/** One steering choice for the computer. The same function drives the ghost you see. */
+export function botInput(level: BotLevel, drive: Drive, track: Track): DriveInput {
+  const look = level === "pro" ? 22 : level === "intermediate" ? 14 : 8;
+  const gain = level === "pro" ? 2.8 : level === "intermediate" ? 2 : 1.15;
+  const i = Math.floor(drive.position / SEGMENT_LENGTH);
+  let curve = 0;
+  for (let k = 2; k <= look; k++) curve += track.segments[(i + k) % track.segments.length].curve;
+  curve /= look;
+  // A positive curve pulls the car left, so the target sits a little right of centre.
+  const target = Math.max(-0.72, Math.min(0.72, curve * 0.28));
+  const err = target - drive.x;
+  const steer = Math.max(-1, Math.min(1, err * gain));
+  const off = Math.abs(drive.x) > 0.92;
+  const fast = Math.abs(curve) > 2.6 && drive.speed > MAX_SPEED * 0.78;
+  return {
+    left: steer < -0.12,
+    right: steer > 0.12,
+    accel: !off && !fast && drive.speed < MAX_SPEED * (level === "beginner" ? 0.7 : 0.96),
+    brake: off || fast,
+  };
+}
+
 /** The computer drives the same road. Skill is how far ahead it looks. */
 export function autoTime(level: BotLevel, seed: number): number {
   const track = buildTrack(seed);
   const drive = createDrive();
-  const look = level === "pro" ? 22 : level === "intermediate" ? 14 : 8;
-  const gain = level === "pro" ? 2.8 : level === "intermediate" ? 2 : 1.15;
   const dt = 1 / 60;
-  while (drive.time < RACE_LIMIT && !drive.done) {
-    const i = Math.floor(drive.position / SEGMENT_LENGTH);
-    let curve = 0;
-    for (let k = 2; k <= look; k++) curve += track.segments[(i + k) % track.segments.length].curve;
-    curve /= look;
-    // A positive curve pulls the car left, so the target sits a little right of centre.
-    const target = Math.max(-0.72, Math.min(0.72, curve * 0.28));
-    const err = target - drive.x;
-    const steer = Math.max(-1, Math.min(1, err * gain));
-    const off = Math.abs(drive.x) > 0.92;
-    const fast = Math.abs(curve) > 2.6 && drive.speed > MAX_SPEED * 0.78;
-    stepDrive(
-      drive,
-      {
-        left: steer < -0.12,
-        right: steer > 0.12,
-        accel: !off && !fast && drive.speed < MAX_SPEED * (level === "beginner" ? 0.7 : 0.96),
-        brake: off || fast,
-      },
-      dt,
-      track,
-    );
-  }
+  while (drive.time < RACE_LIMIT && !drive.done) stepDrive(drive, botInput(level, drive, track), dt, track);
   return markFor(drive, track);
 }
 

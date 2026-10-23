@@ -160,7 +160,7 @@ export function GameStage({ session, onLeave }: Props) {
           <Board
             state={state}
             me={me}
-            players={room.gamePlayers}
+            players={room.gamePlayers.map((g) => room.players.find((p) => p.id === g.id) ?? g)}
             send={(a: unknown) => session.sendAction(a)}
             clockOffset={game.clockOffset}
           />
