@@ -31,6 +31,12 @@ export const handCricketBot: GameBot<HandCricketState, HandCricketAction> = (s, 
   const batting = inn.batter === me;
   if (level === "beginner") return { type: "pick", n: pickRandom(NUMBERS) };
 
+  // No balls yet, so there is no pattern to copy. A weighted pick here always
+  // leans on 6, which made the computer open with the same hand most games.
+  if (!s.lastBall) return { type: "pick", n: pickRandom(NUMBERS) };
+
+  const ownLast = s.lastBall.batter === me ? s.lastBall.bat : s.lastBall.bowl;
+
   // Numbers the opponent has shown so far (their batting runs reveal their picks).
   const seen = Array(6).fill(1);
   for (const innings of s.cricket.innings) {
@@ -46,14 +52,18 @@ export const handCricketBot: GameBot<HandCricketState, HandCricketAction> = (s, 
     // Prefer big numbers, but avoid what the bowler is likely to throw.
     const chasing = s.cricket.target !== null ? s.cricket.target - inn.runs : null;
     const weights = NUMBERS.map((n, i) => {
-      let w = 1 + n * (level === "pro" ? 0.6 : 0.4);
+      let w = 1 + n * (level === "pro" ? 0.25 : 0.15);
       w /= seen[i];
+      if (n === ownLast) w *= 0.25;
       if (chasing !== null && n >= chasing) w *= 2.5; // a single hit wins the match
       return w;
     });
     return { type: "pick", n: weighted(weights) };
   }
   // Bowling: aim at the batter's favourites.
-  const weights = seen.map((c) => Math.pow(c, level === "pro" ? 1.6 : 1.1));
+  const weights = seen.map((c, i) => {
+    const w = Math.pow(c, level === "pro" ? 1.6 : 1.1);
+    return NUMBERS[i] === ownLast ? w * 0.25 : w;
+  });
   return { type: "pick", n: weighted(weights) };
 };
