@@ -24,8 +24,8 @@ export const TOUR_STEPS: Record<"home" | "lobby", DriveStep[]> = {
     {
       element: '[data-tour="game-actions"]',
       popover: {
-        title: "Online, computer or guide",
-        description: "Online finds an open table for that game (or opens one others can join). Computer plays offline at Beginner, Intermediate or Pro. 📖 explains the rules.",
+        title: "Friends, computer or guide",
+        description: "Play vs friends finds an open table for that game (or opens one others can join). Play vs computer is offline at Beginner, Intermediate or Pro. The book explains the rules.",
       },
     },
     {

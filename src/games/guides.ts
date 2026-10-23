@@ -120,7 +120,7 @@ export const GUIDES: Record<string, GameGuide> = {
     ],
     terms: [
       { term: "Vettu (cut)", meaning: "Playing a different suit because you have none of the led suit." },
-      { term: "Kazhuthai", meaning: "Donkey: the loser." },
+      { term: "Ace", meaning: "The Ace of spades, which must lead the first trick." },
     ],
   },
   onnu: {
@@ -129,7 +129,7 @@ export const GUIDES: Record<string, GameGuide> = {
       "Glowing cards in your hand can be played. Tap to play.",
       "Wild cards open a colour picker.",
       "Tap the deck to draw. If the drawn card fits, you can play it or pass.",
-      "Hit the ONNU! button when you're down to 2 cards on your turn.",
+      "Hit the UNO! button when you're down to 2 cards on your turn.",
       "See someone on 1 card without a call? Tap Catch! to give them +2.",
     ],
     tips: [
@@ -143,6 +143,7 @@ export const GUIDES: Record<string, GameGuide> = {
       "Draw by tapping the closed deck or the open card.",
       "Tap cards to select them, then Group to make a meld. Groups show if they're valid.",
       "Tap one card then Discard to end your turn, or Declare to finish the game.",
+      "You have 45 seconds to draw and 45 seconds to discard. The clock draws or discards for you when it runs out.",
       "Sort arranges your hand by suit automatically.",
     ],
     tips: [

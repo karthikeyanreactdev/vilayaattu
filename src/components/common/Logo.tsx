@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { APP, ROUTES } from "@/config/constants";
+import { useI18n } from "@/hooks/useI18n";
 import { cn } from "@/lib/utils";
 
 /** Brand mark: a kolam-inspired dot grid inside a rounded tile. */
 export function Logo({ className, compact }: { className?: string; compact?: boolean }) {
+  const { locale } = useI18n();
   return (
     <Link href={ROUTES.HOME} className={cn("group flex items-center gap-2.5", className)} aria-label={`${APP.NAME} home`}>
       <span className="relative grid size-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-orange-600 shadow-md shadow-primary/30 transition-transform group-hover:rotate-6">
@@ -20,7 +24,7 @@ export function Logo({ className, compact }: { className?: string; compact?: boo
       {!compact && (
         <span className="flex flex-col leading-none">
           <span className="text-lg font-extrabold tracking-tight">{APP.NAME}</span>
-          <span className="tamil text-[11px] text-muted-foreground">{APP.TAMIL_NAME}</span>
+          {locale !== "en" && <span className="tamil text-[11px] text-muted-foreground">{APP.TAMIL_NAME}</span>}
         </span>
       )}
     </Link>

@@ -103,10 +103,10 @@ function withCounts(s: OnnuState): OnnuState {
 export const onnu: GameRules<OnnuState, OnnuAction> = {
   meta: {
     id: "onnu",
-    name: "Onnu",
-    tamilName: "ஒன்னு",
-    tagline: "Match colours, play action cards, shout \"Onnu!\" on your last card.",
-    emoji: "🃏",
+    name: "UNO",
+    tamilName: "யூனோ",
+    tagline: "Match colours, play action cards, shout \"UNO!\" on your last card.",
+    emoji: "🎴",
     category: "Cards",
     minPlayers: 2,
     maxPlayers: 6,
@@ -118,7 +118,7 @@ export const onnu: GameRules<OnnuState, OnnuAction> = {
       "Skip: next player loses a turn. Reverse: change direction (acts as Skip with 2 players). +2: next player draws 2.",
       "Wild: pick any colour. Wild +4: pick a colour and the next player draws 4.",
       "Can't play? Draw a card. If it fits you may play it, otherwise pass.",
-      "Press ONNU! when you play your second-last card. If someone catches you first, you draw 2.",
+      "Press UNO! when you play your second-last card. If someone catches you first, you draw 2.",
       "First to empty their hand wins.",
     ],
   },
@@ -172,8 +172,8 @@ export const onnu: GameRules<OnnuState, OnnuAction> = {
     if (action.type === "onnu") {
       const count = hand(state, by).length;
       const myTurnWithTwo = me === state.turn && count === 2;
-      if (count !== 1 && !myTurnWithTwo) return fail("Call Onnu when you're about to have one card.");
-      return bump({ ...state, declared: { ...state.declared, [by]: true }, lastEvent: ev("onnu", "ONNU!") });
+      if (count !== 1 && !myTurnWithTwo) return fail("Call UNO when you're about to have one card.");
+      return bump({ ...state, declared: { ...state.declared, [by]: true }, lastEvent: ev("onnu", "UNO!") });
     }
 
     if (action.type === "catch") {

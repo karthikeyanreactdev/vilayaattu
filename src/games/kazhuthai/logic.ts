@@ -58,10 +58,10 @@ function nextActive(state: KazhuthaiState, from: PlayerId, hands: Record<PlayerI
 export const kazhuthai: GameRules<KazhuthaiState, KazhuthaiAction> = {
   meta: {
     id: "kazhuthai",
-    name: "Kazhuthai",
-    tamilName: "கழுதை",
-    tagline: "Don't be the donkey! Follow suit or cut the trick.",
-    emoji: "🫏",
+    name: "Ace",
+    tamilName: "ஏஸ்",
+    tagline: "Lead the Ace of spades. Follow suit or cut.",
+    emoji: "♠️",
     category: "Cards",
     minPlayers: 2,
     maxPlayers: 6,
@@ -73,7 +73,7 @@ export const kazhuthai: GameRules<KazhuthaiState, KazhuthaiAction> = {
       "Everyone must follow the suit that was led, if they can.",
       "If everyone follows, the trick is thrown away. The highest card leads next.",
       "If you can't follow, play any card. That's a cut: the trick stops, and whoever played the highest card of the led suit picks up all the cards.",
-      "Empty your hand to escape. The last player holding cards is the Kazhuthai (donkey)!",
+      "Empty your hand to escape. The last player holding cards loses.",
       "You have 15 seconds each turn. If you don't play, your lowest legal card is played for you. If you have no legal card, the turn passes on.",
     ],
   },
@@ -260,13 +260,13 @@ function closeIfDone(next: KazhuthaiState, hands: Record<PlayerId, MaybeCard[]>,
     const donkeyName = next.players.find((p) => p.id === donkey)?.name;
     const scores = next.players.map((p) => {
       const pos = finished.indexOf(p.id);
-      return { playerId: p.id, label: p.id === donkey ? "🫏 Kazhuthai" : pos >= 0 ? `Escaped #${pos + 1}` : "—" };
+      return { playerId: p.id, label: p.id === donkey ? "🂡 Last" : pos >= 0 ? `Escaped #${pos + 1}` : "—" };
     });
     next = finish(next, {
       winners: finished.slice(0, 1),
       loser: donkey ?? undefined,
-      title: donkey ? `${donkeyName} is the Kazhuthai! 🫏` : "Everyone escaped!",
-      detail: donkey ? `Stuck with ${hands[donkey].length} card${hands[donkey].length === 1 ? "" : "s"}` : "No donkey this time",
+      title: donkey ? `${donkeyName} is last! 🂡` : "Everyone escaped!",
+      detail: donkey ? `Stuck with ${hands[donkey].length} card${hands[donkey].length === 1 ? "" : "s"}` : "Everyone got out",
       scores,
     });
   }

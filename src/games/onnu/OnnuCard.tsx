@@ -67,7 +67,7 @@ export function OnnuCardView({ card, size = "md", playable, dimmed, layoutId, on
       {hidden ? (
         <div className="grid size-full place-items-center">
           <span className="-rotate-12 rounded-full bg-gradient-to-r from-red-500 via-yellow-400 to-blue-500 px-1 text-[8px] font-black text-white sm:text-[10px]">
-            {size === "xs" ? "" : "ONNU"}
+            {size === "xs" ? "" : "UNO"}
           </span>
         </div>
       ) : (

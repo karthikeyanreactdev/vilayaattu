@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { SeatRow } from "@/components/game/SeatRow";
 import { TurnBanner } from "@/components/game/TurnBanner";
+import { useNow } from "@/hooks/useNow";
 import { useSound } from "@/hooks/useSound";
 import { cn } from "@/lib/utils";
 import { playerName } from "../helpers";
@@ -18,7 +19,7 @@ import { CARD_SIZE } from "../cards/cardSizes";
 import { checkHand, isJoker } from "./melds";
 import { arrangeHand } from "./arrange";
 import { HandGroups } from "./HandGroups";
-import type { RummyAction, RummyState } from "./logic";
+import { RUMMY_TURN_MS, type RummyAction, type RummyState } from "./logic";
 
 function sortedGroups(cards: PlayingCard[], jokerRank: number): string[][] {
   const groups: string[][] = [];
@@ -31,8 +32,9 @@ function sortedGroups(cards: PlayingCard[], jokerRank: number): string[][] {
   return groups;
 }
 
-export default function RummyBoard({ state, me, players, send }: GameBoardProps<RummyState, RummyAction>) {
+export default function RummyBoard({ state, me, players, send, clockOffset }: GameBoardProps<RummyState, RummyAction>) {
   const play = useSound();
+  const now = useNow(state.status === "playing" && typeof state.deadline === "number", 200);
   // A fresh game starts with a shuffle and deal.
   const [shuffling, setShuffling] = useState(state.moveNo === 0);
   const [selected, setSelected] = useState<string[]>([]);
@@ -96,6 +98,8 @@ export default function RummyBoard({ state, me, players, send }: GameBoardProps<
 
   const one = selected.length === 1 ? selected[0] : null;
   const phaseText = state.phase === "draw" ? "Draw from the deck or open pile" : one ? "Discard or declare with the selected card" : "Select one card to discard";
+  const leftMs = typeof state.deadline === "number" ? Math.max(0, state.deadline - (now + clockOffset)) : null;
+  const secs = leftMs === null ? null : Math.ceil(leftMs / 1000);
 
   return (
     <LayoutGroup>
@@ -117,6 +121,26 @@ export default function RummyBoard({ state, me, players, send }: GameBoardProps<
             </div>
           )}
         />
+
+        {secs !== null && state.status === "playing" && (
+          <div className="flex flex-col items-center gap-1" data-turn-timer={secs}>
+            <div
+              className={cn(
+                "rounded-full px-3 py-1 text-sm font-black tabular-nums",
+                secs <= 5 ? "bg-red-600 text-white" : "bg-black/45 text-white",
+              )}
+            >
+              {secs}s
+            </div>
+            <div className="h-1.5 w-28 overflow-hidden rounded-full bg-black/30">
+              <div
+                className={cn("h-full rounded-full", secs <= 5 ? "bg-red-400" : "bg-amber-300")}
+                style={{ width: `${Math.min(100, ((leftMs ?? 0) / RUMMY_TURN_MS) * 100)}%` }}
+              />
+            </div>
+            {state.timedOut === turnId && <p className="text-xs font-semibold text-amber-200">Time's up</p>}
+          </div>
+        )}
 
         {/* Piles */}
         <div className="flex items-center justify-center gap-6 py-3 sm:gap-10">

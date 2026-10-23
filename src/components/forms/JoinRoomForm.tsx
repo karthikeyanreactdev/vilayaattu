@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { ROOM } from "@/config/constants";
 import { normalizeRoomCode } from "@/lib/random";
 import { joinRoomSchema, type JoinRoomValues } from "@/lib/validation";
+import { useI18n } from "@/hooks/useI18n";
 import { FormikField } from "./FormikField";
 
 type Props = { onJoin: (code: string) => void; disabled?: boolean };
 
 export function JoinRoomForm({ onJoin, disabled }: Props) {
+  const { t } = useI18n();
   return (
     <Formik<JoinRoomValues>
       initialValues={{ code: "" }}
@@ -21,7 +23,7 @@ export function JoinRoomForm({ onJoin, disabled }: Props) {
         <Form className="grid gap-2" noValidate>
           <FormikField
             name="code"
-            label="Room code"
+            label={t.roomCode}
             placeholder="ABC-123"
             autoComplete="off"
             autoCapitalize="characters"
@@ -34,7 +36,7 @@ export function JoinRoomForm({ onJoin, disabled }: Props) {
             }}
           />
           <Button type="submit" size="lg" variant="secondary" className="h-11 text-base" disabled={disabled || !isValid || !dirty}>
-            <LogIn /> Join room
+            <LogIn /> {t.joinRoom}
           </Button>
         </Form>
       )}

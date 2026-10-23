@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { GameIcon } from "@/components/game/GameIcon";
 import { GUIDES } from "@/games/guides";
+import { useI18n } from "@/hooks/useI18n";
 import { playerRange } from "@/games/registry";
 import type { GameMeta } from "@/games/types";
 
@@ -34,9 +36,7 @@ export function GameGuideContent({ meta }: { meta: GameMeta }) {
   return (
     <div className="grid gap-6 pb-6">
       <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${meta.accent} p-5 text-white`}>
-        <div className="absolute -top-4 -right-2 text-8xl opacity-25 select-none" aria-hidden>
-          {meta.emoji}
-        </div>
+        <GameIcon id={meta.id} className="absolute -top-2 -right-1 size-28 text-white opacity-30" />
         <p className="text-sm/relaxed opacity-95">{meta.tagline}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge variant="secondary" className="bg-white/20 text-white">
@@ -111,6 +111,7 @@ type Props = { meta: GameMeta; trigger?: React.ReactElement; label?: string; ico
 
 /** "How to play" side sheet; bottom sheet on phones. */
 export function HowToPlay({ meta, trigger, label = "How to play", iconOnly }: Props) {
+  const text = useI18n().game(meta);
   return (
     <Sheet>
       <SheetTrigger
@@ -130,8 +131,8 @@ export function HowToPlay({ meta, trigger, label = "How to play", iconOnly }: Pr
       <SheetContent side="right" className="w-full gap-0 sm:max-w-md">
         <SheetHeader className="border-b border-border">
           <SheetTitle className="flex items-center gap-2 text-lg">
-            <span aria-hidden>{meta.emoji}</span> {meta.name}
-            {meta.tamilName && <span className="tamil text-sm font-normal text-muted-foreground">{meta.tamilName}</span>}
+            <GameIcon id={meta.id} className="size-7" /> {text.title}
+            {text.subtitle && <span className="indic text-sm font-normal text-muted-foreground">{text.subtitle}</span>}
           </SheetTitle>
           <SheetDescription>How to play</SheetDescription>
         </SheetHeader>

@@ -10,7 +10,7 @@ export const chess3d: GameRules<ChessState, ChessAction> = {
     name: "Royal Chess 3D",
     tamilName: "ராஜ சதுரங்கம்",
     tagline: "Brick Rajas, elephants and horses march, fight and fall. Real chess in 3D.",
-    emoji: "🐘",
+    emoji: "♔",
     accent: "from-amber-600 to-red-700",
     rules: [
       ...chessGame.meta.rules,

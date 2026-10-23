@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
+import { GameIcon } from "@/components/game/GameIcon";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BOT_LEVELS, type BotLevel, type GameMeta } from "@/games/types";
@@ -26,7 +27,9 @@ export function QuickPlayDialog({ meta, size, onCancel, onCreateNow }: QuickProp
                   transition={{ duration: 2, repeat: Infinity, delay: i * 0.66, ease: "easeOut" }}
                 />
               ))}
-              <span className="absolute inset-0 grid place-items-center text-5xl">{meta.emoji}</span>
+              <span className="absolute inset-0 grid place-items-center">
+                <GameIcon id={meta.id} className="size-14" />
+              </span>
             </div>
             <DialogHeader className="items-center">
               <DialogTitle>
@@ -70,7 +73,7 @@ export function VsComputerDialog({ meta, onClose, onStart }: VsProps) {
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <span aria-hidden>{meta.emoji}</span> {meta.name} vs Computer
+                <GameIcon id={meta.id} className="size-7" /> {meta.name} vs Computer
               </DialogTitle>
               <DialogDescription>Play offline against Chitti and friends. Pick a level.</DialogDescription>
             </DialogHeader>
@@ -136,7 +139,7 @@ export function TableSizeDialog({ meta, onClose, onPick }: SizeProps) {
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <span aria-hidden>{meta.emoji}</span> {meta.name} online
+                <GameIcon id={meta.id} className="size-7" /> {meta.name} online
               </DialogTitle>
               <DialogDescription>How many players at the table? We&apos;ll find a table of that size, or open one.</DialogDescription>
             </DialogHeader>

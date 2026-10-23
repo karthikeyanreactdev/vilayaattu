@@ -42,7 +42,7 @@ export const pallanguzhi: GameRules<PallanguzhiState, PallanguzhiAction> = {
     name: "Pallanguzhi",
     tamilName: "பல்லாங்குழி",
     tagline: "The 14-pit seed game from every Tamil household.",
-    emoji: "🪵",
+    emoji: "🫘",
     category: "Tamil classics",
     minPlayers: 2,
     maxPlayers: 2,

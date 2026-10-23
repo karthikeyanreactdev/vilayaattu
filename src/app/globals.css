@@ -37,6 +37,7 @@
   --color-board-dark: var(--board-dark);
   --color-glow: var(--glow);
   --font-tamil: var(--font-noto-tamil);
+  --font-indic: var(--font-noto-tamil);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -162,6 +163,14 @@
   .tamil {
     font-family: var(--font-noto-tamil), var(--font-geist-sans), sans-serif;
   }
+  .indic {
+    font-family: var(--font-indic), var(--font-geist-sans), sans-serif;
+  }
+  html[data-locale="ta"] { --font-indic: var(--font-noto-tamil); }
+  html[data-locale="hi"] { --font-indic: var(--font-noto-devanagari); }
+  html[data-locale="ml"] { --font-indic: var(--font-noto-malayalam); }
+  html[data-locale="kn"] { --font-indic: var(--font-noto-kannada); }
+  html[data-locale="te"] { --font-indic: var(--font-noto-telugu); }
   .no-tap-highlight {
     -webkit-tap-highlight-color: transparent;
   }

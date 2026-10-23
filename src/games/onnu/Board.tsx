@@ -90,7 +90,7 @@ export default function OnnuBoard({ state, me, players, send }: GameBoardProps<O
           caption={(p) => (
             <span className={cn(state.counts[p.id] === 1 && "font-bold text-amber-300")}>
               {state.counts[p.id]} card{state.counts[p.id] === 1 ? "" : "s"}
-              {state.declared[p.id] && state.counts[p.id] === 1 && " · ONNU!"}
+              {state.declared[p.id] && state.counts[p.id] === 1 && " · UNO!"}
             </span>
           )}
           extra={(p) => (
@@ -209,7 +209,7 @@ export default function OnnuBoard({ state, me, players, send }: GameBoardProps<O
                       className="animate-pulse bg-gradient-to-r from-red-500 via-yellow-400 to-blue-500 font-black text-white shadow-lg"
                       onClick={() => send({ type: "onnu" })}
                     >
-                      ONNU!
+                      UNO!
                     </Button>
                   </motion.div>
                 )}

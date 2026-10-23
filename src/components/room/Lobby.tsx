@@ -5,6 +5,7 @@ import { Play, Settings2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { GameIcon } from "@/components/game/GameIcon";
 import { GameTile } from "@/components/game/GameTile";
 import { HowToPlay } from "@/components/game/HowToPlay";
 import { CATEGORIES, GAMES, getGameDefinition } from "@/games/registry";
@@ -148,7 +149,7 @@ export function Lobby({ session }: { session: RoomSession }) {
             >
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="flex items-center gap-2 font-semibold">
-                  <Settings2 className="size-4" /> {def.meta.emoji} {def.meta.name} settings
+                  <Settings2 className="size-4" /> <GameIcon id={def.meta.id} className="size-6" /> {def.meta.name} settings
                 </h2>
                 <HowToPlay meta={def.meta} />
               </div>

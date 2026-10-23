@@ -14,8 +14,10 @@ import { BOARDS } from "@/games/boards";
 import { getGameDefinition } from "@/games/registry";
 import type { BaseGameState } from "@/games/types";
 import type { RoomSession } from "@/lib/room/roomSession";
+import { useI18n } from "@/hooks/useI18n";
 import { useAppSelector } from "@/store";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { GameIcon } from "./GameIcon";
 import { HowToPlay } from "./HowToPlay";
 import { FloatingReactions, ReactionPicker } from "./Reactions";
 import { ResultOverlay } from "./ResultOverlay";
@@ -26,10 +28,12 @@ type Props = { session: RoomSession; onLeave: () => void };
 export function GameStage({ session, onLeave }: Props) {
   const room = useAppSelector((s) => s.room);
   const game = useAppSelector((s) => s.game);
+  const { game: gameText } = useI18n();
   const me = useAppSelector((s) => s.user.id);
   const [confirm, setConfirm] = useState<null | "leave" | "end">(null);
 
   const def = room.gameId ? getGameDefinition(room.gameId) : undefined;
+  const text = def ? gameText(def.meta) : null;
   const Board = room.gameId ? BOARDS[room.gameId] : undefined;
   const state = game.view as BaseGameState | null;
   const seated = room.gamePlayers.some((p) => p.id === me);
@@ -49,9 +53,9 @@ export function GameStage({ session, onLeave }: Props) {
           </Button>
           <div className="min-w-0 flex-1">
             <h1 className="flex items-center gap-2 truncate font-bold">
-              <span aria-hidden>{def?.meta.emoji}</span> {def?.meta.name}
+              {def && <GameIcon id={def.meta.id} className="size-7" />} {text?.title ?? def?.meta.name}
             </h1>
-            {def?.meta.tamilName && <p className="tamil -mt-0.5 truncate text-xs text-muted-foreground">{def.meta.tamilName}</p>}
+            {text?.subtitle && <p className="indic -mt-0.5 truncate text-xs text-muted-foreground">{text.subtitle}</p>}
           </div>
           {def && <HowToPlay meta={def.meta} label="Guide" />}
           {room.isHost && (

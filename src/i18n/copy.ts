@@ -1,0 +1,201 @@
+import type { Locale } from "./locales";
+
+export type HomeCopy = {
+  badge: string;
+  hello: string;
+  headline: string;
+  invite: string;
+  blurb: string;
+  stepCreate: string;
+  stepCreateText: string;
+  stepShare: string;
+  stepShareText: string;
+  stepBot: string;
+  stepBotText: string;
+  withFriends: string;
+  upTo: string;
+  createRoom: string;
+  orJoin: string;
+  roomCode: string;
+  joinRoom: string;
+  games: string;
+  gamesHint: string;
+  all: string;
+  categories: Record<"Tamil classics" | "Cricket" | "Strategy" | "Cards", string>;
+  online: string;
+  computer: string;
+  players: string;
+  minutes: string;
+  footer: string;
+};
+
+export const HOME: Record<Locale, HomeCopy> = {
+  en: {
+    badge: "Play on any phone · No sign-up",
+    hello: "Vanakkam",
+    headline: "Desi games, together.",
+    invite: "Come, let's play!",
+    blurb: "Pallanguzhi, Aadu Puli, Hand Cricket, Chess, UNO and more.",
+    stepCreate: "Create a room",
+    stepCreateText: "One tap. You become the host.",
+    stepShare: "Share the code",
+    stepShareText: "Friends join from any phone.",
+    stepBot: "Or vs computer",
+    stepBotText: "Beginner, Intermediate or Pro.",
+    withFriends: "Play with friends",
+    upTo: "Up to 6 players in a room.",
+    createRoom: "Create a room",
+    orJoin: "or join one",
+    roomCode: "Room code",
+    joinRoom: "Join room",
+    games: "Games",
+    gamesHint: "Play vs friends, or play vs computer.",
+    all: "All",
+    categories: { "Tamil classics": "Classics", Cricket: "Cricket", Strategy: "Strategy", Cards: "Cards" },
+    online: "Play vs friends",
+    computer: "Play vs computer",
+    players: "players",
+    minutes: "min",
+    footer: "Made with love in Tamil Nadu · Games run between your phones",
+  },
+  ta: {
+    badge: "எந்த போனிலும் · பதிவு வேண்டாம்",
+    hello: "வணக்கம்",
+    headline: "நம்ம ஆட்டம், ஒன்றாக.",
+    invite: "வா, விளையாடலாம்!",
+    blurb: "பல்லாங்குழி, ஆடு புலி, கை கிரிக்கெட், சதுரங்கம், UNO மற்றும் பல.",
+    stepCreate: "அறை உருவாக்கு",
+    stepCreateText: "ஒரு தட்டல். நீங்களே host.",
+    stepShare: "குறியீட்டைப் பகிர்",
+    stepShareText: "நண்பர்கள் எந்த போனிலும் சேரலாம்.",
+    stepBot: "அல்லது கணினி",
+    stepBotText: "தொடக்க, நடுத்தர, வல்லுநர்.",
+    withFriends: "நண்பர்களுடன் விளையாடு",
+    upTo: "ஒரு அறையில் 6 பேர் வரை.",
+    createRoom: "அறை உருவாக்கு",
+    orJoin: "அல்லது சேர்",
+    roomCode: "அறை குறியீடு",
+    joinRoom: "அறையில் சேர்",
+    games: "ஆட்டங்கள்",
+    gamesHint: "நண்பர்களுடன் ஆடு, அல்லது கணினியுடன் ஆடு.",
+    all: "அனைத்தும்",
+    categories: { "Tamil classics": "தமிழ் ஆட்டம்", Cricket: "கிரிக்கெட்", Strategy: "உத்தி", Cards: "சீட்டு" },
+    online: "நண்பர்களுடன் ஆடு",
+    computer: "கணினியுடன் ஆடு",
+    players: "பேர்",
+    minutes: "நிமி",
+    footer: "தமிழ்நாட்டில் அன்புடன் · ஆட்டம் உங்கள் போன்களுக்கு இடையே ஓடும்",
+  },
+  hi: {
+    badge: "किसी भी फ़ोन पर · साइन-अप नहीं",
+    hello: "नमस्ते",
+    headline: "देसी खेल, साथ में।",
+    invite: "आओ, खेलें!",
+    blurb: "पल्लनकुझि, आडु पुली, हैंड क्रिकेट, शतरंज, UNO और भी बहुत कुछ।",
+    stepCreate: "कमरा बनाएँ",
+    stepCreateText: "एक टैप। आप होस्ट बनेंगे।",
+    stepShare: "कोड बाँटें",
+    stepShareText: "दोस्त किसी भी फ़ोन से जुड़ें।",
+    stepBot: "या कंप्यूटर से",
+    stepBotText: "शुरुआती, मध्यम या प्रो।",
+    withFriends: "दोस्तों के साथ खेलें",
+    upTo: "एक कमरे में 6 खिलाड़ी तक।",
+    createRoom: "कमरा बनाएँ",
+    orJoin: "या जुड़ें",
+    roomCode: "रूम कोड",
+    joinRoom: "कमरे में जाएँ",
+    games: "खेल",
+    gamesHint: "दोस्तों से खेलें, या कंप्यूटर से खेलें।",
+    all: "सभी",
+    categories: { "Tamil classics": "क्लासिक", Cricket: "क्रिकेट", Strategy: "रणनीति", Cards: "पत्ते" },
+    online: "दोस्तों से खेलें",
+    computer: "कंप्यूटर से खेलें",
+    players: "खिलाड़ी",
+    minutes: "मिनट",
+    footer: "तमिलनाडु से प्यार के साथ · खेल सीधे आपके फ़ोन पर चलते हैं",
+  },
+  ml: {
+    badge: "ഏത് ഫോണിലും · സൈൻ-അപ്പ് വേണ്ട",
+    hello: "നമസ്കാരം",
+    headline: "നമ്മുടെ കളികൾ, ഒരുമിച്ച്.",
+    invite: "വാ, കളിക്കാം!",
+    blurb: "പല്ലാങ്കുഴി, ആട് പുലി, ഹാൻഡ് ക്രിക്കറ്റ്, ചെസ്സ്, UNO എന്നിവയും മറ്റും.",
+    stepCreate: "റൂം ഉണ്ടാക്കൂ",
+    stepCreateText: "ഒരു ടാപ്പ്. നിങ്ങൾ ഹോസ്റ്റ്.",
+    stepShare: "കോഡ് പങ്കിടൂ",
+    stepShareText: "കൂട്ടുകാർ ഏത് ഫോണിൽ നിന്നും ചേരാം.",
+    stepBot: "അല്ലെങ്കിൽ കമ്പ്യൂട്ടർ",
+    stepBotText: "തുടക്കം, ഇടത്തരം, പ്രോ.",
+    withFriends: "കൂട്ടുകാരോടൊപ്പം കളിക്കൂ",
+    upTo: "ഒരു റൂമിൽ 6 പേർ വരെ.",
+    createRoom: "റൂം ഉണ്ടാക്കൂ",
+    orJoin: "അല്ലെങ്കിൽ ചേരൂ",
+    roomCode: "റൂം കോഡ്",
+    joinRoom: "റൂമിൽ ചേരൂ",
+    games: "കളികൾ",
+    gamesHint: "കൂട്ടുകാരോട് കളിക്കൂ, അല്ലെങ്കിൽ കമ്പ്യൂട്ടറിനോട് കളിക്കൂ.",
+    all: "എല്ലാം",
+    categories: { "Tamil classics": "ക്ലാസിക്", Cricket: "ക്രിക്കറ്റ്", Strategy: "തന്ത്രം", Cards: "ചീട്ട്" },
+    online: "കൂട്ടുകാരോട് കളി",
+    computer: "കമ്പ്യൂട്ടറിനോട് കളി",
+    players: "പേർ",
+    minutes: "മിനിറ്റ്",
+    footer: "തമിഴ്നാട്ടിൽ നിന്ന് സ്നേഹത്തോടെ · കളി നിങ്ങളുടെ ഫോണുകൾക്കിടയിൽ",
+  },
+  kn: {
+    badge: "ಯಾವ ಫೋನಿನಲ್ಲಾದರೂ · ಸೈನ್-ಅಪ್ ಬೇಡ",
+    hello: "ನಮಸ್ಕಾರ",
+    headline: "ನಮ್ಮ ಆಟಗಳು, ಒಟ್ಟಿಗೆ.",
+    invite: "ಬಾ, ಆಡೋಣ!",
+    blurb: "ಪಲ್ಲಾಂಕುಳಿ, ಆಡು ಪುಲಿ, ಹ್ಯಾಂಡ್ ಕ್ರಿಕೆಟ್, ಚೆಸ್, UNO ಮತ್ತು ಇನ್ನೂ.",
+    stepCreate: "ರೂಮ್ ಮಾಡಿ",
+    stepCreateText: "ಒಂದು ಟ್ಯಾಪ್. ನೀವೇ ಹೋಸ್ಟ್.",
+    stepShare: "ಕೋಡ್ ಹಂಚಿ",
+    stepShareText: "ಸ್ನೇಹಿತರು ಯಾವ ಫೋನಿನಿಂದ ಬೇಕಾದರೂ ಸೇರಬಹುದು.",
+    stepBot: "ಅಥವಾ ಕಂಪ್ಯೂಟರ್",
+    stepBotText: "ಆರಂಭ, ಮಧ್ಯಮ ಅಥವಾ ಪ್ರೋ.",
+    withFriends: "ಸ್ನೇಹಿತರೊಂದಿಗೆ ಆಡಿ",
+    upTo: "ಒಂದು ರೂಮಿನಲ್ಲಿ 6 ಜನರವರೆಗೆ.",
+    createRoom: "ರೂಮ್ ಮಾಡಿ",
+    orJoin: "ಅಥವಾ ಸೇರಿ",
+    roomCode: "ರೂಮ್ ಕೋಡ್",
+    joinRoom: "ರೂಮ್ ಸೇರಿ",
+    games: "ಆಟಗಳು",
+    gamesHint: "ಸ್ನೇಹಿತರ ಜೊತೆ ಆಡಿ, ಅಥವಾ ಕಂಪ್ಯೂಟರ್ ಜೊತೆ ಆಡಿ.",
+    all: "ಎಲ್ಲಾ",
+    categories: { "Tamil classics": "ಕ್ಲಾಸಿಕ್", Cricket: "ಕ್ರಿಕೆಟ್", Strategy: "ತಂತ್ರ", Cards: "ಎಲೆ" },
+    online: "ಸ್ನೇಹಿತರ ಜೊತೆ",
+    computer: "ಕಂಪ್ಯೂಟರ್ ಜೊತೆ",
+    players: "ಜನ",
+    minutes: "ನಿಮಿಷ",
+    footer: "ತಮಿಳುನಾಡಿನಿಂದ ಪ್ರೀತಿಯಿಂದ · ಆಟ ನಿಮ್ಮ ಫೋನುಗಳ ನಡುವೆ",
+  },
+  te: {
+    badge: "ఏ ఫోనైనా · సైన్-అప్ అవసరం లేదు",
+    hello: "నమస్కారం",
+    headline: "మన ఆటలు, కలిసి.",
+    invite: "రా, ఆడుదాం!",
+    blurb: "పల్లాంకుళి, ఆడు పులి, హ్యాండ్ క్రికెట్, చెస్, UNO ఇంకా మరెన్నో.",
+    stepCreate: "రూమ్ సృష్టించండి",
+    stepCreateText: "ఒక్క ట్యాప్. మీరే హోస్ట్.",
+    stepShare: "కోడ్ పంచుకోండి",
+    stepShareText: "స్నేహితులు ఏ ఫోన్ నుంచైనా చేరవచ్చు.",
+    stepBot: "లేదా కంప్యూటర్",
+    stepBotText: "బిగినర్, మధ్యస్థం లేదా ప్రో.",
+    withFriends: "స్నేహితులతో ఆడండి",
+    upTo: "ఒక రూమ్‌లో 6 మంది వరకు.",
+    createRoom: "రూమ్ సృష్టించండి",
+    orJoin: "లేదా చేరండి",
+    roomCode: "రూమ్ కోడ్",
+    joinRoom: "రూమ్‌లో చేరండి",
+    games: "ఆటలు",
+    gamesHint: "స్నేహితులతో ఆడండి, లేదా కంప్యూటర్‌తో ఆడండి.",
+    all: "అన్నీ",
+    categories: { "Tamil classics": "క్లాసిక్", Cricket: "క్రికెట్", Strategy: "వ్యూహం", Cards: "పేక" },
+    online: "స్నేహితులతో ఆడండి",
+    computer: "కంప్యూటర్‌తో ఆడండి",
+    players: "మంది",
+    minutes: "నిమి",
+    footer: "తమిళనాడు నుండి ప్రేమతో · ఆట మీ ఫోన్ల మధ్య నడుస్తుంది",
+  },
+};
