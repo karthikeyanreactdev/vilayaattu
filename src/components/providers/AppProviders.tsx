@@ -15,7 +15,7 @@ import { hydrateSettings } from "@/store/slices/settingsSlice";
 /** Loads saved profile/settings and keeps the sound engine in sync. */
 function Bootstrap() {
   const dispatch = useAppDispatch();
-  const { music, sfx, hydrated } = useAppSelector((s) => s.settings);
+  const { sfx, hydrated } = useAppSelector((s) => s.settings);
 
   useEffect(() => {
     dispatch(hydrateUser());
@@ -25,8 +25,8 @@ function Bootstrap() {
   useEffect(() => {
     if (!hydrated) return;
     soundEngine.setSfx(sfx);
-    soundEngine.setMusic(music);
-  }, [music, sfx, hydrated]);
+    soundEngine.setMusic(false);
+  }, [sfx, hydrated]);
 
   // Browsers only allow audio after a user gesture.
   useEffect(() => {

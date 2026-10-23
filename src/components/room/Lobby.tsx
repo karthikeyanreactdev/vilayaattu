@@ -96,8 +96,8 @@ export function Lobby({ session }: { session: RoomSession }) {
       </div>
 
       <div className="grid content-start gap-4">
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm" data-tour="game-picker">
-          <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between gap-2" data-tour="game-picker">
             <h2 className="font-semibold">{room.isHost ? "Pick a game" : "Games"}</h2>
             {!room.isHost && <span className="text-xs text-muted-foreground">The host chooses</span>}
           </div>

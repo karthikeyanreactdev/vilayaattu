@@ -1,6 +1,6 @@
 "use client";
 
-import { Music, Volume2, VolumeX, Vibrate } from "lucide-react";
+import { Volume2, VolumeX, Vibrate } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,14 +13,14 @@ import {
 import { soundEngine } from "@/lib/audio/soundEngine";
 import { useHydrated } from "@/hooks/useHydrated";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { setHaptics, setMusic, setSfx } from "@/store/slices/settingsSlice";
+import { setHaptics, setSfx } from "@/store/slices/settingsSlice";
 
-/** Music / sound effects / vibration toggles. */
+/** Sound effects and vibration toggles. */
 export function SoundMenu() {
-  const { music, sfx, haptics } = useAppSelector((s) => s.settings);
+  const { sfx, haptics } = useAppSelector((s) => s.settings);
   const dispatch = useAppDispatch();
   const hydrated = useHydrated();
-  const muted = hydrated && !music && !sfx;
+  const muted = hydrated && !sfx;
 
   return (
     <DropdownMenu>
@@ -32,15 +32,6 @@ export function SoundMenu() {
       <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Sound</DropdownMenuLabel>
-          <DropdownMenuCheckboxItem
-            checked={music}
-            onCheckedChange={(v) => {
-              soundEngine.unlock();
-              dispatch(setMusic(Boolean(v)));
-            }}
-          >
-            <Music /> Background music
-          </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
             checked={sfx}
             onCheckedChange={(v) => {

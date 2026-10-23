@@ -4,25 +4,34 @@ import { useEffect, useRef } from "react";
 import "driver.js/dist/driver.css";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { completeTour } from "@/store/slices/settingsSlice";
-import { TOUR_STEPS } from "./tourSteps";
+import { TOUR } from "@/i18n/tour";
+import { tourSteps } from "./tourSteps";
 
-type Props = { page: keyof typeof TOUR_STEPS };
+type Page = "home" | "lobby";
+type Props = { page: Page };
 
 /**
- * Guided tour. Runs automatically once on the home page for new users,
- * and again whenever the "?" button in the header is pressed.
+ * Guided tour. Home runs once for a new player. The lobby runs once
+ * the first time they host or join a room. The ? button replays the
+ * tour for the screen they are on.
+ *
+ * driver.js does not call onDestroyed for the Done button unless the
+ * active element is still set, so Done and the close button mark the
+ * tour finished themselves. Escape and the overlay still use onDestroyed.
+ * Unmount destroys with reason "api" and must not mark it finished.
  */
 export function AppTour({ page }: Props) {
   const dispatch = useAppDispatch();
-  const { tourDone, tourRequest, hydrated } = useAppSelector((s) => s.settings);
+  const { tourDone, lobbyTourDone, tourRequest, hydrated, locale } = useAppSelector((s) => s.settings);
   const userName = useAppSelector((s) => s.user.name);
   const lastRequest = useRef(tourRequest);
+  const done = page === "home" ? tourDone : lobbyTourDone;
 
   useEffect(() => {
     if (!hydrated) return;
     const requested = tourRequest !== lastRequest.current;
     lastRequest.current = tourRequest;
-    const auto = page === "home" && !tourDone && Boolean(userName);
+    const auto = !done && (page === "home" ? Boolean(userName) : true);
     if (!requested && !auto) return;
 
     let cancelled = false;
@@ -30,31 +39,54 @@ export function AppTour({ page }: Props) {
     const timer = setTimeout(async () => {
       const { driver } = await import("driver.js");
       if (cancelled) return;
-      const steps = TOUR_STEPS[page].filter((s) => !s.element || document.querySelector(s.element as string));
+      const copy = TOUR[locale] ?? TOUR.en;
+      const finish = () => dispatch(completeTour(page));
       const d = driver({
+        animate: false,
         showProgress: true,
+        progressText: "{{current}} / {{total}}",
         allowClose: true,
         smoothScroll: true,
-        overlayOpacity: 0.55,
-        stagePadding: 6,
-        stageRadius: 14,
+        overlayOpacity: 0.62,
+        stagePadding: 8,
+        stageRadius: 16,
+        popoverOffset: 14,
+        skipMissingElement: true,
+        waitForElement: 800,
+        disableActiveInteraction: true,
         popoverClass: "vt-tour",
-        nextBtnText: "Next →",
-        prevBtnText: "← Back",
-        doneBtnText: "Let's play!",
-        steps,
-        onDestroyed: () => dispatch(completeTour()),
+        nextBtnText: copy.next,
+        prevBtnText: copy.back,
+        doneBtnText: copy.done,
+        steps: tourSteps(locale)[page],
+        onNextClick: () => {
+          if (!d.hasNextStep()) {
+            finish();
+            d.destroy();
+            return;
+          }
+          d.moveNext();
+        },
+        onPrevClick: () => d.movePrevious(),
+        onCloseClick: () => {
+          finish();
+          d.destroy();
+        },
+        onDestroyed: (_element, _step, opts) => {
+          if (cancelled) return;
+          if (opts.reason === "escape" || opts.reason === "overlay") finish();
+        },
       });
       instance = d;
       d.drive();
-    }, 600);
+    }, 700);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
       instance?.destroy();
     };
-  }, [page, tourRequest, tourDone, hydrated, userName, dispatch]);
+  }, [page, tourRequest, done, hydrated, userName, locale, dispatch]);
 
   return null;
 }

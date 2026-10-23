@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ArrowLeft, Ellipsis, Eye, Home, RotateCcw, WifiOff } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Ellipsis, Eye, Home, Maximize2, Minimize2, RotateCcw, WifiOff } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,8 +19,23 @@ import { useAppSelector } from "@/store";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { GameIcon } from "./GameIcon";
 import { HowToPlay } from "./HowToPlay";
-import { FloatingReactions, ReactionPicker } from "./Reactions";
+import { FloatingReactions, ReactionWindow } from "./Reactions";
 import { ResultOverlay } from "./ResultOverlay";
+import { cn } from "@/lib/utils";
+
+type FullscreenDocument = Document & {
+  webkitFullscreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void> | void;
+};
+
+type FullscreenElement = HTMLElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
+
+function fullscreenElement() {
+  const doc = document as FullscreenDocument;
+  return doc.fullscreenElement ?? doc.webkitFullscreenElement ?? null;
+}
 
 type Props = { session: RoomSession; onLeave: () => void };
 
@@ -31,6 +46,46 @@ export function GameStage({ session, onLeave }: Props) {
   const { game: gameText } = useI18n();
   const me = useAppSelector((s) => s.user.id);
   const [confirm, setConfirm] = useState<null | "leave" | "end">(null);
+  /** Covers the screen when the browser refuses the Fullscreen API (common on iPhone). */
+  const [forced, setForced] = useState(false);
+  const [native, setNative] = useState(false);
+  const full = native || forced;
+
+  useEffect(() => {
+    const sync = () => setNative(Boolean(fullscreenElement()));
+    document.addEventListener("fullscreenchange", sync);
+    document.addEventListener("webkitfullscreenchange", sync);
+    return () => {
+      document.removeEventListener("fullscreenchange", sync);
+      document.removeEventListener("webkitfullscreenchange", sync);
+      const doc = document as FullscreenDocument;
+      if (fullscreenElement()) {
+        if (doc.exitFullscreen) void doc.exitFullscreen().catch(() => undefined);
+        else doc.webkitExitFullscreen?.();
+      }
+    };
+  }, []);
+
+  const toggleFull = async () => {
+    if (forced) {
+      setForced(false);
+      return;
+    }
+    const doc = document as FullscreenDocument;
+    const el = document.documentElement as FullscreenElement;
+    try {
+      if (fullscreenElement()) {
+        if (doc.exitFullscreen) await doc.exitFullscreen();
+        else doc.webkitExitFullscreen?.();
+        return;
+      }
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else setForced(true);
+    } catch {
+      setForced(true);
+    }
+  };
 
   const def = room.gameId ? getGameDefinition(room.gameId) : undefined;
   const text = def ? gameText(def.meta) : null;
@@ -45,7 +100,13 @@ export function GameStage({ session, onLeave }: Props) {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div
+      data-fullscreen={full ? "on" : "off"}
+      className={cn(
+        "flex min-h-0 flex-1 flex-col",
+        forced && "fixed inset-0 z-30 h-dvh w-dvw overflow-auto bg-background",
+      )}
+    >
       <div className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-lg">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-3 pt-[env(safe-area-inset-top)]">
           <Button variant="ghost" size="icon" aria-label="Leave game" onClick={() => setConfirm("leave")}>
@@ -57,6 +118,9 @@ export function GameStage({ session, onLeave }: Props) {
             </h1>
             {text?.subtitle && <p className="indic -mt-0.5 truncate text-xs text-muted-foreground">{text.subtitle}</p>}
           </div>
+          <Button variant="ghost" size="icon" aria-label={full ? "Exit full screen" : "Full screen"} aria-pressed={full} onClick={() => void toggleFull()}>
+            {full ? <Minimize2 className="size-5" /> : <Maximize2 className="size-5" />}
+          </Button>
           {def && <HowToPlay meta={def.meta} label="Guide" />}
           {room.isHost && (
             <DropdownMenu>
@@ -105,9 +169,7 @@ export function GameStage({ session, onLeave }: Props) {
         )}
       </main>
 
-      <div className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40">
-        <ReactionPicker onReact={(e) => session.sendReaction(e)} />
-      </div>
+      <ReactionWindow onReact={(e) => session.sendReaction(e)} />
       <FloatingReactions />
 
       <ResultOverlay

@@ -88,19 +88,21 @@ export function HomeScreen() {
 
           <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-[1.1fr_0.9fr] md:items-center md:py-16">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <LanguagePicker />
-              <span className="indic mt-4 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                <Wifi className="size-3.5" /> {t.badge}
-              </span>
-              <h1 className="indic mt-4 text-4xl font-black tracking-tight text-balance sm:text-5xl">
-                {hydrated && user.name ? (
-                  <>
-                    {t.hello}, <span className="text-primary">{user.name}</span>!
-                  </>
-                ) : (
-                  t.headline
-                )}
-              </h1>
+              <div data-tour="welcome">
+                <LanguagePicker />
+                <span className="indic mt-4 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                  <Wifi className="size-3.5" /> {t.badge}
+                </span>
+                <h1 className="indic mt-4 text-4xl font-black tracking-tight text-balance sm:text-5xl">
+                  {hydrated && user.name ? (
+                    <>
+                      {t.hello}, <span className="text-primary">{user.name}</span>!
+                    </>
+                  ) : (
+                    t.headline
+                  )}
+                </h1>
+              </div>
               <p className="indic mt-2 text-lg text-muted-foreground">{t.invite}</p>
               <p className="indic mt-3 max-w-lg text-muted-foreground">{t.blurb}</p>
               <div className="mt-6 grid max-w-md grid-cols-3 gap-3">

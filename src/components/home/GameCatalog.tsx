@@ -32,6 +32,7 @@ function GamePoster({ meta, index, onQuickPlay, onVsComputer }: { meta: GameMeta
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index, 8) * 0.04, type: "spring", stiffness: 280, damping: 26 }}
+      data-tour={index === 0 ? "game-card" : undefined}
       className="flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-border bg-card shadow-sm"
     >
       <button
@@ -60,7 +61,7 @@ function GamePoster({ meta, index, onQuickPlay, onVsComputer }: { meta: GameMeta
             <Clock className="size-3.5" /> {meta.duration} {t.minutes}
           </span>
         </div>
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-2 pt-1" data-tour={index === 0 ? "game-actions" : undefined}>
+        <div className="grid grid-cols-[1fr_1fr_auto] gap-2 pt-1">
           <Button size="sm" className="h-auto whitespace-normal px-2 py-1.5 text-xs leading-tight" onClick={onQuickPlay}>
             <Users /> {t.online}
           </Button>
