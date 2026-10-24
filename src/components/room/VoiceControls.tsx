@@ -3,6 +3,7 @@
 import { GripHorizontal, Mic, MicOff, Video, VideoOff, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { ReactionPad } from "@/components/game/Reactions";
 import { Button } from "@/components/ui/button";
 import { useVoice } from "@/hooks/useVoice";
 import type { RoomSession } from "@/lib/room/roomSession";
@@ -159,6 +160,7 @@ export function VoiceControls({ session }: { session: RoomSession }) {
           Try again
         </Button>
       )}
+      <ReactionPad onReact={(emoji) => session.sendReaction(emoji)} />
     </div>
   );
 }

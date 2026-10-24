@@ -7,7 +7,7 @@
 export type ThemeMode = "light" | "dark" | "system";
 
 export const THEME = {
-  DEFAULT_MODE: "system" as ThemeMode,
+  DEFAULT_MODE: "light" as ThemeMode,
   MODES: [
     { value: "light", label: "Light" },
     { value: "dark", label: "Dark" },

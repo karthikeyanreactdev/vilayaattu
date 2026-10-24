@@ -19,7 +19,7 @@ import { useAppSelector } from "@/store";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { GameIcon } from "./GameIcon";
 import { HowToPlay } from "./HowToPlay";
-import { FloatingReactions, ReactionWindow } from "./Reactions";
+import { FloatingReactions } from "./Reactions";
 import { ResultOverlay } from "./ResultOverlay";
 import { cn } from "@/lib/utils";
 
@@ -169,7 +169,6 @@ export function GameStage({ session, onLeave }: Props) {
         )}
       </main>
 
-      <ReactionWindow onReact={(e) => session.sendReaction(e)} />
       <FloatingReactions />
 
       <ResultOverlay

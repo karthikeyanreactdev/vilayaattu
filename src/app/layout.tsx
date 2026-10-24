@@ -35,6 +35,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${notoTamil.variable} ${notoDevanagari.variable} ${notoMalayalam.variable} ${notoKannada.variable} ${notoTelugu.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col no-tap-highlight" suppressHydrationWarning>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("theme");if(!t||t==="system")localStorage.setItem("theme","light")}catch(e){}`,
+          }}
+        />
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

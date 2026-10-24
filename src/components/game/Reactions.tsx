@@ -1,8 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { GripHorizontal } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useAppSelector } from "@/store";
 import { useSound } from "@/hooks/useSound";
@@ -50,49 +49,13 @@ export function FloatingReactions() {
   );
 }
 
-/** Draggable window for sending a reaction. */
-export function ReactionWindow({ onReact }: { onReact: (emoji: string) => void }) {
+/** Emoji picker that lives on the floating call panel. */
+export function ReactionPad({ onReact }: { onReact: (emoji: string) => void }) {
   const play = useSound();
-  const body = useBody();
-  const panel = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ dx: number; dy: number } | null>(null);
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
-  if (!body) return null;
 
-  return createPortal(
-    <div
-      ref={panel}
-      data-tour="reactions"
-      className="fixed z-[70] w-[min(15rem,calc(100vw-1.5rem))] rounded-2xl border border-border bg-card/95 p-2 shadow-xl backdrop-blur"
-      style={pos ? { left: pos.x, top: pos.y } : { left: 12, bottom: "max(1rem, env(safe-area-inset-bottom))" }}
-    >
-      <div className="mb-1 flex items-center gap-1">
-        <button
-          type="button"
-          className="grid size-8 shrink-0 cursor-grab place-items-center rounded-lg text-muted-foreground active:cursor-grabbing"
-          aria-label="Move reactions"
-          onPointerDown={(event) => {
-            const rect = panel.current?.getBoundingClientRect();
-            if (!rect) return;
-            drag.current = { dx: event.clientX - rect.left, dy: event.clientY - rect.top };
-            event.currentTarget.setPointerCapture(event.pointerId);
-          }}
-          onPointerMove={(event) => {
-            if (!drag.current) return;
-            const width = panel.current?.offsetWidth ?? 200;
-            const height = panel.current?.offsetHeight ?? 120;
-            const x = Math.min(window.innerWidth - width - 8, Math.max(8, event.clientX - drag.current.dx));
-            const y = Math.min(window.innerHeight - height - 8, Math.max(8, event.clientY - drag.current.dy));
-            setPos({ x, y });
-          }}
-          onPointerUp={() => {
-            drag.current = null;
-          }}
-        >
-          <GripHorizontal className="size-4" />
-        </button>
-        <p className="text-xs font-semibold">Reactions</p>
-      </div>
+  return (
+    <div data-tour="reactions" className="mt-2 border-t border-border pt-2">
+      <p className="mb-1 px-1 text-[11px] font-semibold">Reactions</p>
       <div className="grid grid-cols-4 gap-1">
         {EMOJIS.map((emoji) => (
           <button
@@ -109,7 +72,6 @@ export function ReactionWindow({ onReact }: { onReact: (emoji: string) => void }
           </button>
         ))}
       </div>
-    </div>,
-    body,
+    </div>
   );
 }
