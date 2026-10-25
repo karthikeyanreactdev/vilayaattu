@@ -192,7 +192,15 @@ export const GUIDES: Record<string, GameGuide> = {
 };
 
 // Same game on the 3D forest board.
-GUIDES["aadu-puli-3d"] = GUIDES["aadu-puli"];
+GUIDES["aadu-puli-3d"] = {
+  ...GUIDES["aadu-puli"],
+  controls: [
+    "You stand in the clearing at goat height. Walk with W A S D or the arrow keys, drag to look round, hold Shift to run, C to crouch.",
+    "Look at an animal to read its mood: in trouble, nervous, calm, ready to pounce, trapped. The card at the bottom explains why.",
+    "Aim the crosshair at a point or an animal and press E (or tap it) to pick or move. Goats: aim at an empty point to place.",
+    "The radar in the corner shows every animal as a dot and flashes the other player's last move. Press M or tap it to enlarge.",
+  ],
+};
 GUIDES["chess-3d"] = {
   ...GUIDES.chess,
   terms: [

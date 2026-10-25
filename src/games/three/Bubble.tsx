@@ -45,11 +45,12 @@ export function Bubble({ text, height, bubbleRef }: { text: string; height: numb
   );
 }
 
-/** Pop the bubble in or out. */
-export function showBubble(s: THREE.Sprite | null, on: boolean) {
+/** Pop the bubble in or out; `size` shrinks it when the camera is right up close. */
+export function showBubble(s: THREE.Sprite | null, on: boolean, size = 1) {
   if (!s) return;
   const goal = on ? 1 : 0;
-  const k = THREE.MathUtils.lerp(s.scale.y / 0.6, goal, 0.3);
-  s.scale.set(1.6 * k, 0.6 * k, 1);
+  const k = THREE.MathUtils.lerp(s.scale.y / (0.6 * (s.userData.size ?? 1)), goal, 0.3);
+  s.userData.size = size;
+  s.scale.set(1.6 * k * size, 0.6 * k * size, 1);
   s.visible = k > 0.02;
 }

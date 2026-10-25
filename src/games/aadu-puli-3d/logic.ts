@@ -8,7 +8,7 @@ export const aaduPuli3d: GameRules<AaduPuliState, AaduPuliAction> = {
     ...aaduPuli.meta,
     id: "aadu-puli-3d",
     name: "Aadu Puli 3D",
-    tagline: "Goats and tigers in a 3D forest. Watch the pounce!",
+    tagline: "Walk the forest at goat height. Read the animals, then make your move.",
     emoji: "🐅",
     accent: "from-green-600 to-orange-500",
   },

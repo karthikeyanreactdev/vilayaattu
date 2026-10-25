@@ -1,11 +1,12 @@
 "use client";
 
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { CLIPS, CreatureBody, useCreature, type Kind } from "./Creature";
 import { PEN_SPOTS, POINTS_3D } from "./layout";
 import { Bubble, showBubble } from "../three/Bubble";
+import type { MoodInfo } from "./moods";
 
 /** Timing of the tiger's attack jump, in seconds; the caught goat is timed against it. */
 export const POUNCE = { lift: 0.35, land: 2.1, end: 2.48, height: 1.1 };
@@ -48,7 +49,8 @@ export function Piece({
   moveNo,
   captureMove,
   selected,
-  nervous,
+  mood,
+  focused,
   onTap,
 }: {
   kind: Kind;
@@ -57,10 +59,13 @@ export function Piece({
   /** True when this piece's latest move captured a goat. */
   captureMove: boolean;
   selected: boolean;
-  /** Goat next to a tiger: it crouches, scared. */
-  nervous: boolean;
+  /** How the animal feels about its spot; drives posture, and the bubble when looked at. */
+  mood: MoodInfo | null;
+  /** The walker's crosshair is on this animal: say the mood out loud. */
+  focused: boolean;
   onTap: (index: number) => void;
 }) {
+  const nervous = mood?.mood === "nervous" || mood?.mood === "doomed";
   const { scene, play, fit } = useCreature(kind);
   const root = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
@@ -76,6 +81,13 @@ export function Piece({
   const neck = useMemo(() => (kind === "T" ? findNeck(scene) : null), [kind, scene]);
   const bubble = useRef<THREE.Sprite>(null);
   const yum = useRef<THREE.Sprite>(null);
+  const moodBubble = useRef<THREE.Sprite>(null);
+  const moodRef = useRef(mood);
+  const focusedRef = useRef(focused);
+  useLayoutEffect(() => {
+    moodRef.current = mood;
+    focusedRef.current = focused;
+  }, [mood, focused]);
 
   /** Switch clips only when the wanted one changes. */
   const want = (name: string, opts?: Parameters<typeof play>[1]) => {
@@ -111,7 +123,7 @@ export function Piece({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, moveNo, captureMove, kind, play]);
 
-  useFrame(({ clock: c }) => {
+  useFrame(({ clock: c, camera }) => {
     const t = c.elapsedTime;
     clock.current = t;
     const g = root.current;
@@ -171,6 +183,19 @@ export function Piece({
       if (t >= a.until) anim.current = { type: "idle" };
     } else if (kind === "T") {
       want(CLIPS.T.idle, { fade: 0.4 });
+      const m = moodRef.current?.mood;
+      if (neck && m === "pounce") {
+        // Ready to pounce: head low, shoulders down, a slow coiled rock.
+        neck.quaternion.multiply(nod.setFromAxisAngle(NOD_AXIS, 0.35 + Math.sin(t * 2.2) * 0.08));
+        sy = 0.93;
+        sx = 1.03;
+      } else if (neck && m === "trapped") {
+        // Trapped: sulking, head hung, the odd angry shake.
+        neck.quaternion.multiply(nod.setFromAxisAngle(NOD_AXIS, 0.5));
+        wiggle = Math.sin(t * 18) * 0.02 * Math.max(0, Math.sin(t * 0.7));
+      } else if (neck && m === "cornered") {
+        neck.quaternion.multiply(nod.setFromAxisAngle(NOD_AXIS, Math.sin(t * 1.4) * 0.25));
+      }
     } else {
       // Goats: calm loop, scared crouch next to a tiger, and the odd nervous hop.
       const h = t - nextHop.current;
@@ -180,12 +205,18 @@ export function Piece({
       } else {
         if (h >= 0.6) nextHop.current = t + (nervous ? 2 : 4) + Math.random() * 5;
         want(nervous ? CLIPS.G.nervous : CLIPS.G.idle, { fade: 0.3 });
-        if (nervous) wiggle = Math.sin(t * 40) * 0.03;
+        if (nervous) wiggle = Math.sin(t * 40) * (moodRef.current?.mood === "doomed" ? 0.05 : 0.025);
+        if (moodRef.current?.mood === "doomed") sy = 0.92; // cowering
+        if (moodRef.current?.mood === "proud") y += Math.max(0, Math.sin(t * 4)) * 0.06; // a cheeky bounce
       }
     }
     if (selected) y += 0.25 + Math.sin(t * 6) * 0.06;
     if (a.type !== "pounce") showBubble(bubble.current, false);
     if (a.type !== "victory") showBubble(yum.current, false);
+    // The mood bubble only while the walker looks this way, and never over the action bubbles.
+    // Up close it would fill the screen, so it shrinks with distance to the camera.
+    const near = THREE.MathUtils.clamp(camera.position.distanceTo(g.position) / 7, 0.4, 1);
+    showBubble(moodBubble.current, focusedRef.current && !!moodRef.current && a.type !== "pounce" && a.type !== "victory" && a.type !== "drop", near);
 
     g.position.set(pos.current.x, y, pos.current.y);
     g.rotation.y = yaw.current + wiggle;
@@ -204,6 +235,7 @@ export function Piece({
       </group>
       {kind === "T" && <Bubble text="ROAR! 🐯" height={1.9} bubbleRef={bubble} />}
       {kind === "T" && <Bubble text="YUM! 😋" height={1.9} bubbleRef={yum} />}
+      {mood && <Bubble text={mood.bubble} height={kind === "T" ? 1.7 : 1.5} bubbleRef={moodBubble} />}
     </group>
   );
 }

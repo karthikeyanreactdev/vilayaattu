@@ -186,6 +186,13 @@ const clearingTextureOnce = () => (mossTexture ??= clearingTexture());
 
 // The same for every player, so build it once.
 const FOREST = buildForest();
+
+/** Things a walker bumps into inside the clearing: standing trunks and rocks, as circles (x, z, radius). */
+export const OBSTACLES: { x: number; z: number; r: number }[] = [
+  // Trunk height is 0.5–0.8 of the tree, so this covers the lowest branches at eye height too.
+  ...FOREST.trunks.filter((t) => !t.r && insideClearing(t.p[0], t.p[2], -1)).map((t) => ({ x: t.p[0], z: t.p[2], r: t.s[1] * 0.9 + 0.3 })),
+  ...FOREST.rocks.filter((t) => insideClearing(t.p[0], t.p[2], -1)).map((t) => ({ x: t.p[0], z: t.p[2], r: Math.max(t.s[0], t.s[2]) + 0.25 })),
+];
 const STONES = (() => {
   const rand = rng(7);
   return POINTS_3D.map(([x, z]) => ({ x, z, rot: rand() * 6.28, sx: 0.95 + rand() * 0.15, sz: 0.9 + rand() * 0.15 }));
